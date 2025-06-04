@@ -58,14 +58,17 @@ class DataToImage(
         self._setDefault(**self.defaultParams)
         self._set(**kwargs)
 
+    def process(self, input, path, resolution):
+        return Image.from_binary(
+            input,
+            path,
+            self.getImageType(),
+            resolution=resolution,
+        )
+
     def transform_udf(self, input, path, resolution):
         try:
-            return Image.from_binary(
-                input,
-                path,
-                self.getImageType(),
-                resolution=resolution,
-            )
+            return self.process(input, path, resolution)
         except Exception as ex:
             exception = traceback.format_exc()
             exception = f"DataToImage: {exception}"

@@ -144,6 +144,7 @@ def ScaleDPSession(
     """
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["TRANSFORMERS_VERBOSITY"] = logLevel.lower()
+    os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 
     if with_pro and find_spec("scaledp_pro") is None:
         raise ImportError(

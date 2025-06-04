@@ -1,7 +1,7 @@
 
 <p align="center">
   <br/>
-    <a href="https://stabrise.com/scaledp/"><img alt="ScaleDP" src="https://stabrise.com/static/images/projects/scaledp.webp" width="450" style="max-width: 100%;"></a>
+    <a href="https://stabrise.com/scaledp/" target="_blank"><img alt="ScaleDP" src="https://stabrise.com/static/images/projects/scaledp.webp" width="450" style="max-width: 100%;"></a>
   <br/>
 </p>
 
