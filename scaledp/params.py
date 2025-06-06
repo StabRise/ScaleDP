@@ -189,6 +189,34 @@ class HasOutputCol(Params):
         return self._set(outputCol=value)
 
 
+class HasBypassCol(Params):
+    """
+    Mixin for param inputCol: input column name.
+    """
+
+    bypassCol: "Param[str]" = Param(
+        Params._dummy(),
+        "bypassCol",
+        "Bypass input column name.",
+        typeConverter=TypeConverters.toString,
+    )
+
+    def __init__(self) -> None:
+        super(HasBypassCol, self).__init__()
+
+    def getBypassCol(self) -> str:
+        """
+        Gets the value of bypassCol or its default value.
+        """
+        return self.getOrDefault(self.bypassCol)
+
+    def setBypassCol(self, value):
+        """
+        Sets the value of :py:attr:`bypassCol`.
+        """
+        return self._set(bypassCol=value)
+
+
 class HasResolution(Params):
     resolution = Param(
         Params._dummy(),

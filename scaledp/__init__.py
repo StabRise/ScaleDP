@@ -61,7 +61,7 @@ DataFrame.show_ner = lambda self, column="ner", limit=20, truncate=True: show_ne
     truncate,
 )
 DataFrame.show_text = (
-    lambda self, column="text", field="text", limit=20, width=None: show_text(
+    lambda self, column="", field="text", limit=20, width=None: show_text(
         self,
         column,
         field,

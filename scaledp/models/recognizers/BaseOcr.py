@@ -15,6 +15,7 @@ from pyspark.sql.types import (
 )
 
 from scaledp.params import (
+    HasBypassCol,
     HasColumnValidator,
     HasDefaultEnum,
     HasInputCol,
@@ -55,6 +56,7 @@ class BaseOcr(
     HasPageCol,
     HasPathCol,
     HasPropagateExc,
+    HasBypassCol,
 ):
 
     scaleFactor = Param(
@@ -121,7 +123,7 @@ class BaseOcr(
         lines = [sorted(xs, key=lambda i: int(i.x)) for xs in lines]
         return BaseOcr.to_formatted_text(lines, character_height)
 
-    def transform_udf(self, image, params=None):
+    def transform_udf(self, image, bypass=None, params=None):
         logging.info("Run OCR")
         if params is None:
             params = self.get_params()
@@ -136,6 +138,9 @@ class BaseOcr(
                 type="text",
                 exception=image.exception,
             )
+        if bypass and bypass != "None":
+            logging.info("Bypass OCR")
+            return bypass
         try:
             image_pil = image.to_pil()
             scale_factor = self.getScaleFactor()
@@ -175,6 +180,7 @@ class BaseOcr(
     def transform_udf_pandas(
         cls,
         images: pd.DataFrame,
+        bypass: pd.DataFrame,
         params: pd.Series,
     ) -> pd.DataFrame:
         params = json.loads(params[0])
@@ -225,11 +231,19 @@ class BaseOcr(
     def _transform(self, dataset):
         out_col = self.getOutputCol()
         input_col = self._validate(self.getInputCol(), dataset)
+        if self.getBypassCol():
+            bypass_col = self._validate(self.getBypassCol(), dataset)
+        else:
+            bypass_col = lit("None")
         params = self.get_params()
         if not self.getPartitionMap():
             result = dataset.withColumn(
                 out_col,
-                udf(self.transform_udf, Document.get_schema())(input_col, lit(params)),
+                udf(self.transform_udf, Document.get_schema())(
+                    input_col,
+                    bypass_col,
+                    lit(params),
+                ),
             )
         else:
             if self.getNumPartitions() > 0:
@@ -242,6 +256,7 @@ class BaseOcr(
                 out_col,
                 pandas_udf(self.transform_udf_pandas, self.outputSchema())(
                     input_col,
+                    bypass_col,
                     lit(params),
                 ),
             )

@@ -54,6 +54,7 @@ class TesseractOcr(BaseOcr):
         {
             "inputCol": "image",
             "outputCol": "text",
+            "bypassCol": "",
             "keepInputData": False,
             "scaleFactor": 1.0,
             "scoreThreshold": 0.5,
