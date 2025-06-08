@@ -18,6 +18,7 @@ from scaledp.params import (
     HasOutputCol,
     HasPageCol,
     HasPathCol,
+    HasResolution,
 )
 from scaledp.schemas.Box import Box
 from scaledp.schemas.Document import Document
@@ -33,6 +34,7 @@ class PdfDataToDocument(
     DefaultParamsReadable,
     DefaultParamsWritable,
     HasColumnValidator,
+    HasResolution,
 ):
     """Extract text with coordinates from PDF file."""
 
@@ -43,6 +45,7 @@ class PdfDataToDocument(
             "pathCol": "path",
             "pageCol": "page",
             "keepInputData": False,
+            "resolution": 300,
         },
     )
 
@@ -60,19 +63,29 @@ class PdfDataToDocument(
                 raise ValueError("Empty PDF document.")
 
             page = doc[0]
-            words = page.get_text("words")
+            # Get the page's transformation matrix and dimensions
+            ctm = page.transformation_matrix
+            dpi = self.getResolution()  # PDF default DPI
 
+            words = page.get_text("words")
             boxes = []
             text_content = []
 
             for word in words:
                 x0, y0, x1, y1, word_text, _, _, _ = word
+                # Convert PDF coordinates to pixel coordinates using the transformation matrix
+                # and maintain position relative to DPI
+                pixel_x0 = x0 * ctm[0] * (dpi / 72)
+                pixel_y0 = abs(y0 * ctm[3] * (dpi / 72))
+                pixel_x1 = x1 * ctm[0] * (dpi / 72)
+                pixel_y1 = abs(y1 * ctm[3] * (dpi / 72))
+
                 boxes.append(
                     Box(
-                        x=int(x0),
-                        y=int(y0),
-                        width=int(x1 - x0),
-                        height=int(y1 - y0),
+                        x=int(pixel_x0),
+                        y=int(pixel_y0),
+                        width=int(pixel_x1 - pixel_x0),
+                        height=int(pixel_y1 - pixel_y0),
                         text=word_text,
                         score=1.0,
                     ),
@@ -108,17 +121,13 @@ class PdfDataToDocument(
         input_col = self._validate(self.getInputCol(), dataset)
         path_col = dataset[self.getPathCol()]
 
-        sel_col = [
-            *dataset.columns,
-            *[
-                udf(self.transform_udf, Document.get_schema())(
-                    input_col,
-                    path_col,
-                ).alias(out_col),
-            ],
-        ]
-
-        result = dataset.select(*sel_col)
+        result = dataset.withColumn(
+            out_col,
+            udf(self.transform_udf, Document.get_schema())(
+                input_col,
+                path_col,
+            ),
+        )
         if not self.getKeepInputData():
             result = result.drop(input_col)
         return result

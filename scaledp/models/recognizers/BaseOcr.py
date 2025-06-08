@@ -138,7 +138,8 @@ class BaseOcr(
                 type="text",
                 exception=image.exception,
             )
-        if bypass and bypass != "None":
+
+        if bypass and bypass != "None" and bypass.bboxes:
             logging.info("Bypass OCR")
             return bypass
         try:
