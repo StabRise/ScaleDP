@@ -1,4 +1,7 @@
 import itertools
+import json
+import logging
+import time
 from pathlib import Path
 from typing import Any, ClassVar, List
 
@@ -72,7 +75,10 @@ def unpathSparkFunctions(pyspark: Any) -> None:
 class DatasetPd(pd.DataFrame):
 
     def withColumn(self, name, col) -> "DatasetPd":
-        self.insert(0, name, col, True)
+        if name in self.columns:
+            self[name] = col
+        else:
+            self.insert(0, name, col, True)
         return self
 
     def drop(self, col) -> "DatasetPd":
@@ -103,25 +109,37 @@ class PandasPipeline:
 
         data = DatasetPd({"content": [data], "path": [filename], "resolution": [0]})
 
-        for stage in self.stages:
-            data = stage._transform(data)
-
-        return data
+        return self.fromPandas(data)
 
     def fromBinary(self, data, filename="memory") -> Any:
+
         data = DatasetPd({"content": [data], "path": [filename], "resolution": [0]})
-        for stage in self.stages:
-            data = stage._transform(data)
-        return data
+        return self.fromPandas(data)
 
     def fromPandas(self, data: pd.DataFrame) -> Any:
+
+        start_time_total = time.time()
+        execution_times = {"stages": []}
         data = DatasetPd(data)
         for stage in self.stages:
+
+            stage_name = stage.__class__.__name__
+            start_time_stage = time.time()
             data = stage._transform(data)
-        return data
+
+            stage_duration = time.time() - start_time_stage
+            execution_times["stages"].append({stage_name: stage_duration})
+            logging.info(
+                f"Stage {stage_name} completed in {stage_duration:.2f} seconds",
+            )
+
+        total_duration = time.time() - start_time_total
+        execution_times["total"] = total_duration
+        logging.info(f"Total execution time: {total_duration:.2f} seconds")
+
+        # Add execution time information as a new column
+        return data.withColumn("execution_time", [json.dumps(execution_times)])
 
     def fromDict(self, data: dict) -> Any:
         data = DatasetPd(data)
-        for stage in self.stages:
-            data = stage._transform(data)
-        return data
+        return self.fromPandas(data)

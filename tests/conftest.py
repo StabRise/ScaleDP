@@ -70,6 +70,13 @@ def pdf_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
+def image_pdf_df(spark_session, resource_path_root):
+    return spark_session.read.format("binaryFile").load(
+        (resource_path_root / "pdfs/image_pdf.pdf").absolute().as_posix(),
+    )
+
+
+@pytest.fixture
 def pdf_file(resource_path_root):
     return (resource_path_root / "pdfs/unipdf-medical-bill.pdf").absolute().as_posix()
 

@@ -1,3 +1,4 @@
+import json
 import tempfile
 
 import pyspark.sql.functions as f
@@ -36,6 +37,22 @@ def test_llm_ner(image_df):
 
     # Check that exceptions is empty
     assert data[0].text.exception == ""
+
+    print(
+        json.dumps(
+            [
+                {
+                    "text": bbox.text,
+                    "score": float(bbox.score),
+                    "x": int(bbox.x),
+                    "y": int(bbox.y),
+                    "width": int(bbox.width),
+                    "height": int(bbox.height),
+                }
+                for bbox in data[0].text.bboxes
+            ],
+        ),
+    )
 
     # Assert that there is exactly one result
     assert len(data) == 1

@@ -61,7 +61,7 @@ DataFrame.show_ner = lambda self, column="ner", limit=20, truncate=True: show_ne
     truncate,
 )
 DataFrame.show_text = (
-    lambda self, column="text", field="text", limit=20, width=None: show_text(
+    lambda self, column="", field="text", limit=20, width=None: show_text(
         self,
         column,
         field,
@@ -144,6 +144,7 @@ def ScaleDPSession(
     """
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["TRANSFORMERS_VERBOSITY"] = logLevel.lower()
+    os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 
     if with_pro and find_spec("scaledp_pro") is None:
         raise ImportError(

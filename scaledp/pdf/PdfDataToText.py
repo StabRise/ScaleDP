@@ -11,100 +11,100 @@ from pyspark.pandas import DataFrame
 from pyspark.sql.functions import posexplode_outer, udf
 from pyspark.sql.types import ArrayType, Row
 
-from scaledp.enums import ImageType
 from scaledp.params import (
     HasColumnValidator,
-    HasDefaultEnum,
-    HasImageType,
     HasInputCol,
     HasKeepInputData,
     HasOutputCol,
     HasPageCol,
     HasPathCol,
-    HasResolution,
-    Param,
-    Params,
-    TypeConverters,
 )
-from scaledp.schemas.Image import Image
+from scaledp.schemas.Box import Box
+from scaledp.schemas.Document import Document
 
 
-class PdfDataToImage(
+class PdfDataToText(
     Transformer,
     HasInputCol,
     HasOutputCol,
     HasKeepInputData,
-    HasImageType,
     HasPathCol,
-    HasResolution,
     HasPageCol,
     DefaultParamsReadable,
     DefaultParamsWritable,
     HasColumnValidator,
-    HasDefaultEnum,
 ):
-    """Extract image from PDF file."""
-
-    pageLimit = Param(
-        Params._dummy(),
-        "pageLimit",
-        "Limit number of pages to convert to image",
-        typeConverter=TypeConverters.toInt,
-    )
+    """Extract text with coordinates from PDF file."""
 
     DEFAULT_PARAMS = MappingProxyType(
         {
             "inputCol": "content",
-            "outputCol": "image",
+            "outputCol": "document",
             "pathCol": "path",
             "pageCol": "page",
             "keepInputData": False,
-            "imageType": ImageType.FILE,
-            "resolution": 300,
-            "pageLimit": 0,
         },
     )
 
     @keyword_only
     def __init__(self, **kwargs: Any) -> None:
-        super(PdfDataToImage, self).__init__()
+        super(PdfDataToText, self).__init__()
         self._setDefault(**self.DEFAULT_PARAMS)
         self._set(**kwargs)
 
-    def transform_udf(self, input: Row, path: Row) -> list[Image]:
-        logging.info("Run Pdf Data to Image")
+    def transform_udf(self, input: Row, path: str) -> list[Document]:
+        logging.info("Run Pdf Data to Text")
         try:
             doc = fitz.open("pdf", input)
             if len(doc) == 0:
                 raise ValueError("Empty PDF document.")
-            if self.getPageLimit():
-                doc = doc[: self.getPageLimit()]
+
+            result = []
             for page in doc:
-                pix = page.get_pixmap(
-                    matrix=fitz.Identity,
-                    dpi=self.getResolution(),
-                    colorspace=fitz.csRGB,
-                    clip=None,
-                    alpha=False,
-                    annots=True,
+                words = page.get_text("words")
+                boxes = []
+                text_content = []
+
+                for word in words:
+                    x0, y0, x1, y1, word_text, _, _, _ = word
+                    boxes.append(
+                        Box(
+                            x=int(x0),
+                            y=int(y0),
+                            width=int(x1 - x0),
+                            height=int(y1 - y0),
+                            text=word_text,
+                            score=1.0,
+                        ),
+                    )
+                    text_content.append(word_text)
+
+                result.append(
+                    Document(
+                        path=path,
+                        text=" ".join(text_content),
+                        type="pdf",
+                        bboxes=boxes,
+                    ),
                 )
-                yield Image.from_binary(
-                    pix.pil_tobytes("png"),
-                    path,
-                    self.getImageType(),
-                    resolution=self.getResolution(),
-                    width=pix.width,
-                    height=pix.height,
-                )
+            return result
 
         except Exception:
             exception = traceback.format_exc()
             exception = (
-                f"{self.uid}: Error during extract image from "
+                f"{self.uid}: Error during extracting text from "
                 f"the PDF document: {exception}"
             )
             logging.warning(exception)
-            return [Image(path=path, exception=exception)]
+            return [
+                Document(
+                    path=path,
+                    text="",
+                    type="pdf",
+                    bboxes=[],
+                    exception=exception,
+                ),
+            ]
 
     def _transform(self, dataset: DataFrame) -> DataFrame:
         out_col = self.getOutputCol()
@@ -115,7 +115,7 @@ class PdfDataToImage(
             *dataset.columns,
             *[
                 posexplode_outer(
-                    udf(self.transform_udf, ArrayType(Image.get_schema()))(
+                    udf(self.transform_udf, ArrayType(Document.get_schema()))(
                         input_col,
                         path_col,
                     ),
@@ -127,11 +127,3 @@ class PdfDataToImage(
         if not self.getKeepInputData():
             result = result.drop(input_col)
         return result
-
-    def getPageLimit(self) -> int:
-        """Get page limit."""
-        return self.getOrDefault(self.pageLimit)
-
-    def setPageLimit(self, value) -> "PdfDataToImage":
-        """Set page limit."""
-        return self._set(pageNumber=value)
