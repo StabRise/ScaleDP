@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from pipeline.PandasPipeline import DatasetPd, PandasPipeline, posexplode
-
 from scaledp import DataToImage
+from scaledp.pipeline.PandasPipeline import DatasetPd, PandasPipeline, posexplode
 
 
 def test_local_pipeline(patch_spark, image_file: str) -> None:
