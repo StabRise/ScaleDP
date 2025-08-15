@@ -30,6 +30,7 @@ class DocTRTextDetector(BaseDetector, HasDevice, HasBatchSize):
             "pageCol": "page",
             "pathCol": "path",
             "propagateError": False,
+            "onlyRotated": False,
         },
     )
 
