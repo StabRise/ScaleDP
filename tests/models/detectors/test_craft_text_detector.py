@@ -1,6 +1,5 @@
 import tempfile
 
-import pytest
 from pyspark.ml import PipelineModel
 
 from scaledp import (
@@ -62,7 +61,6 @@ def test_craft_detector(image_df):
         print("file://" + temp.name)
 
 
-@pytest.skip()
 def test_craft_detector_pdf(image_pdf_df):
     pdf_data_to_image = PdfDataToImage(inputCol="content", outputCol="image")
     detector = CraftTextDetector(
