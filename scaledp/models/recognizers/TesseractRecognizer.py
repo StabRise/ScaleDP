@@ -1,6 +1,8 @@
+import logging
 from types import MappingProxyType
 from typing import Any
 
+import numpy as np
 from pyspark import keyword_only
 from pyspark.ml.param import Param, Params, TypeConverters
 
@@ -64,10 +66,6 @@ class TesseractRecognizer(BaseRecognizer):
         self._setDefault(**self.defaultParams)
         self._set(**kwargs)
 
-    @classmethod
-    def call_pytesseract(cls, images, boxes, params):
-        raise NotImplementedError("Pytesseract version not implemented yet.")
-
     @staticmethod
     def getLangTess(params):
         return "+".join(
@@ -76,6 +74,124 @@ class TesseractRecognizer(BaseRecognizer):
                 for lang in params["lang"]
             ],
         )
+
+    @classmethod
+    def _prepare_box_for_ocr(cls, image_np, box, params):
+        import cv2
+
+        # Ensure box is Box instance
+        if isinstance(box, dict):
+            box = Box(**box)
+        elif not isinstance(box, Box):
+            box = Box(**box.asDict())
+
+        scaled_box = box.scale(params["scaleFactor"], padding=5)
+        if scaled_box.angle == 90:
+            scaled_box.angle = -90
+
+        center_tuple = (
+            scaled_box.x + scaled_box.width / 2,
+            scaled_box.y + scaled_box.height / 2,
+        )
+        size_tuple = (scaled_box.width, scaled_box.height)
+
+        rect = (center_tuple, size_tuple, scaled_box.angle)
+        src_pts = cv2.boxPoints(rect).astype("float32")
+        dst_pts = np.array(
+            [
+                [0, int(scaled_box.height) - 1],
+                [0, 0],
+                [int(scaled_box.width) - 1, 0],
+                [int(scaled_box.width) - 1, int(scaled_box.height) - 1],
+            ],
+            dtype="float32",
+        )
+
+        try:
+            m_transform = cv2.getPerspectiveTransform(src_pts, dst_pts)
+            return cv2.warpPerspective(
+                image_np,
+                m_transform,
+                (int(scaled_box.width), int(scaled_box.height)),
+                flags=cv2.INTER_CUBIC,
+                borderMode=cv2.BORDER_REPLICATE,
+            )
+        except cv2.error as e:
+            logging.error(f"Error processing box {box}: {e}")
+            return None
+
+    @classmethod
+    def _convert_to_pil(cls, cropped_np):
+        import cv2
+        from PIL import Image
+
+        if cropped_np is None or cropped_np.size == 0:
+            return None
+        if cropped_np.ndim == 3:
+            if cropped_np.shape[2] == 4:
+                cropped_np = cv2.cvtColor(cropped_np, cv2.COLOR_RGBA2RGB)
+            elif cropped_np.shape[2] not in (3,):
+                cropped_np = cv2.cvtColor(cropped_np, cv2.COLOR_BGR2GRAY)
+        elif cropped_np.ndim != 2:
+            return None
+        return Image.fromarray(cropped_np)
+
+    @classmethod
+    def _process_image_with_tesseract(cls, image, image_path, detected_boxes, params):
+        from tesserocr import PSM, PyTessBaseAPI
+
+        boxes, texts = [], []
+        image_np = np.array(image)
+        lang = cls.getLangTess(params)
+
+        with PyTessBaseAPI(
+            path=params["tessDataPath"],
+            psm=PSM.SINGLE_WORD,
+            oem=params["oem"],
+            lang=lang,
+        ) as api:
+            api.SetVariable("debug_file", "ocr.log")
+            for box in detected_boxes.bboxes:
+                cropped_np = cls._prepare_box_for_ocr(image_np, box, params)
+                pil_image = cls._convert_to_pil(cropped_np)
+                if pil_image is None:
+                    continue
+
+                api.SetImage(pil_image)
+                api.Recognize(0)
+                b = box
+                if isinstance(box, dict):
+                    b = Box(**b)
+                b.text = api.GetUTF8Text()
+                b.conf = api.MeanTextConf()
+
+                if b.score > params["scoreThreshold"]:
+                    boxes.append(b)
+                    texts.append(b.text)
+
+        if params["keepFormatting"]:
+            text = TesseractRecognizer.box_to_formatted_text(
+                boxes,
+                params["lineTolerance"],
+            )
+        else:
+            text = " ".join(texts)
+
+        return Document(
+            path=image_path,
+            text=text,
+            bboxes=boxes,
+            type="text",
+            exception="",
+        )
+
+    @classmethod
+    def call_pytesseract(cls, images, detected_boxes, params):  # pragma: no cover
+        results = []
+        for (image, image_path), boxes in zip(images, detected_boxes):
+            doc = cls._process_image_with_tesseract(image, image_path, boxes, params)
+            results.append(doc)
+        return results
 
     @classmethod
     def call_tesserocr(cls, images, detected_boxes, params):  # pragma: no cover

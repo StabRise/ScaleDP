@@ -112,7 +112,8 @@ jobs:
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction -E ml
+        run: |
+          poetry install --no-interaction -E ml
 
       #----------------------------------------------
       #              run test suite
@@ -121,7 +122,8 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/'
-        run:
+        run: |
+          poetry install --no-interaction  # ensure the root package is installed
           poetry run pytest --cov-report=xml  --cov=scaledp tests/
 
       #----------------------------------------------

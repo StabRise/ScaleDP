@@ -93,5 +93,5 @@ class DataToImage(
             ),
         )
         if not self.getKeepInputData():
-            result = result.drop(input_col)
+            result = result.drop(self.getInputCol())
         return result

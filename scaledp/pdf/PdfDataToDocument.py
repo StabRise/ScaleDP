@@ -64,28 +64,64 @@ class PdfDataToDocument(
 
             page = doc[0]
             # Get the page's transformation matrix and dimensions
-            ctm = page.transformation_matrix
             dpi = self.getResolution()  # PDF default DPI
+
+            # Get page rotation
+            rotation = page.rotation
+            # Normalize rotation to 0, 90, 180, or 270 degrees
+            rotation = rotation % 360
 
             words = page.get_text("words")
             boxes = []
             text_content = []
 
+            # Get page dimensions
+            page_width = page.mediabox_size[0]
+            page_height = page.mediabox_size[1]
+
             for word in words:
                 x0, y0, x1, y1, word_text, _, _, _ = word
                 # Convert PDF coordinates to pixel coordinates using the transformation matrix
-                # and maintain position relative to DPI
-                pixel_x0 = x0 * ctm[0] * (dpi / 72)
-                pixel_y0 = abs(y0 * ctm[3] * (dpi / 72))
-                pixel_x1 = x1 * ctm[0] * (dpi / 72)
-                pixel_y1 = abs(y1 * ctm[3] * (dpi / 72))
+                # Scale coordinates according to DPI
+                scale = dpi / 72
+
+                # Apply basic coordinate transformation
+                if rotation == 0:
+                    pixel_x0 = x0 * scale
+                    pixel_y0 = y0 * scale
+                    pixel_x1 = x1 * scale
+                    pixel_y1 = y1 * scale
+                elif rotation == 90:
+                    # Rotate 90 degrees clockwise
+                    pixel_x0 = page_height * scale - y0 * scale
+                    pixel_y0 = x0 * scale
+                    pixel_x1 = page_height * scale - y1 * scale
+                    pixel_y1 = x1 * scale
+                elif rotation == 180:
+                    # Rotate 180 degrees
+                    pixel_x0 = page_width * scale - x0 * scale
+                    pixel_y0 = y0 * scale
+                    pixel_x1 = page_width * scale - x1 * scale
+                    pixel_y1 = y1 * scale
+                elif rotation == 270:
+                    # Rotate 270 degrees clockwise
+                    pixel_x0 = y0 * scale
+                    pixel_y0 = page_width * scale - x0 * scale
+                    pixel_x1 = y1 * scale
+                    pixel_y1 = page_width * scale - x1 * scale
+
+                # Ensure coordinates are properly ordered (x0 < x1 and y0 < y1)
+                x_min = min(pixel_x0, pixel_x1)
+                x_max = max(pixel_x0, pixel_x1)
+                y_min = min(pixel_y0, pixel_y1)
+                y_max = max(pixel_y0, pixel_y1)
 
                 boxes.append(
                     Box(
-                        x=int(pixel_x0),
-                        y=int(pixel_y0),
-                        width=int(pixel_x1 - pixel_x0),
-                        height=int(pixel_y1 - pixel_y0),
+                        x=int(x_min),
+                        y=int(y_min),
+                        width=int(x_max - x_min),
+                        height=int(y_max - y_min),
                         text=word_text,
                         score=1.0,
                     ),
@@ -129,5 +165,5 @@ class PdfDataToDocument(
             ),
         )
         if not self.getKeepInputData():
-            result = result.drop(input_col)
+            result = result.drop(self.getInputCol())
         return result

@@ -8,7 +8,7 @@ RUN mkdir -p /etc/apt/sources.list.d
 RUN mv wtf-bookworm.sources /etc/apt/sources.list.d/
 
 RUN apt-get update && apt-get install --no-install-recommends --yes \
-    tesseract-ocr openjdk-8-jdk
+    tesseract-ocr tesseract-ocr-spa openjdk-8-jdk
 
 EXPOSE 8888
 

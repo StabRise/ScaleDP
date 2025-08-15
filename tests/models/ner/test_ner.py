@@ -13,7 +13,55 @@ def test_ner(image_df):
     ocr = TesseractOcr(keepInputData=True)
 
     # Initialize the NER stage with the specified model and device
-    ner = Ner(model="obi/deid_bert_i2b2", numPartitions=0, device=Device.CPU.value)
+    ner = Ner(
+        model="obi/deid_bert_i2b2",
+        numPartitions=0,
+        inputCols=["text", "text"],
+        device=Device.CPU.value,
+    )
+
+    # Transform the image dataframe through the OCR and NER stages
+    result_df = ner.transform(ocr.transform(image_df))
+
+    # Cache the result for performance
+    result = result_df.select("ner", "text").cache()
+
+    # Collect the results
+    data = result.collect()
+
+    # Check that exceptions is empty
+    assert data[0].text.exception == ""
+
+    # Assert that there is exactly one result
+    assert len(data) == 1
+
+    # Assert that the 'ner' field is present in the result
+    assert hasattr(data[0], "ner")
+
+    # Display the NER results for debugging
+    result.show_ner("ner", 40)
+
+    # Visualize the NER results
+    result.visualize_ner()
+
+    # Extract and count the NER tags
+    ner_tags = result.select(f.explode("ner.entities").alias("ner")).select("ner.*")
+
+    # Assert that there are more than 70 NER tags
+    assert ner_tags.count() > 70
+
+
+def test_ner_pandas(image_df):
+    # Initialize the OCR stage
+    ocr = TesseractOcr(keepInputData=True)
+
+    # Initialize the NER stage with the specified model and device
+    ner = Ner(
+        model="obi/deid_bert_i2b2",
+        numPartitions=1,
+        inputCols=["text", "text"],
+        device=Device.CPU.value,
+    )
 
     # Transform the image dataframe through the OCR and NER stages
     result_df = ner.transform(ocr.transform(image_df))

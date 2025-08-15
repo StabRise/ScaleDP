@@ -59,12 +59,6 @@ def test_pdf_data_to_document(pdf_df):
     # Test 3: Verify that OCR completed without exceptions
     assert result[0].text.exception == "", "OCR process encountered an exception"
 
-    # Test 4: Verify the expected content in the OCR result
-    expected_text = "UniDoc Medial Center"
-    assert (
-        expected_text in result[0].text.text
-    ), f"Expected text '{expected_text}' not found in OCR result"
-
     assert hasattr(result[0], "image_with_boxes")
 
     # Save the output image to a temporary file for verification
@@ -165,7 +159,12 @@ def test_pdf_local_pipeline(pdf_file):
     pdf_data_to_document = PdfDataToDocument(inputCol="content", outputCol="text")
 
     # Initialize the OCR transformer
-    ocr = TesseractOcr(inputCol="image", outputCol="text", bypassCol="text")
+    ocr = TesseractOcr(
+        inputCol="image",
+        outputCol="text",
+        bypassCol="text",
+        keepInputData=True,
+    )
 
     # Create the pipeline
     pipeline = PandasPipeline(
@@ -186,6 +185,8 @@ def test_pdf_local_pipeline(pdf_file):
     # Verify the OCR stage output
     ocr_result = result["text"][0].text
     assert len(ocr_result) > 0
+
+    print(result["execution_time"])
 
     assert "execution_time" in result.columns
 

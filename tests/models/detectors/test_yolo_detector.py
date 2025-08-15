@@ -53,47 +53,52 @@ def test_yolo_detector_local_pipeline(receipt_file):
 
     # Temporarily replace the UserDefinedFunction
     pathSparkFunctions(pyspark)
-    # Initialize the pipeline stages
-    data_to_image = DataToImage()
-    detector = YoloDetector(
-        device=Device.CPU,
-        propagateError=True,
-        model="StabRise/receipt-detector-25-12-2024",
-    )
-    draw = ImageDrawBoxes(
-        keepInputData=True,
-        inputCols=["image", "boxes"],
-        filled=False,
-        color="green",
-        lineWidth=5,
-        displayDataList=["score"],
-    )
 
-    # Create the pipeline
-    pipeline = PandasPipeline(stages=[data_to_image, detector, draw])
+    try:
+        # Initialize the pipeline stages
+        data_to_image = DataToImage()
+        detector = YoloDetector(
+            device=Device.CPU,
+            propagateError=True,
+            keepInputData=True,
+            model="StabRise/receipt-detector-25-12-2024",
+        )
+        draw = ImageDrawBoxes(
+            keepInputData=True,
+            inputCols=["image", "boxes"],
+            filled=False,
+            color="green",
+            lineWidth=5,
+            displayDataList=["score"],
+        )
 
-    # Run the pipeline on the input image file
-    result = pipeline.fromFile(receipt_file)
+        # Create the pipeline
+        pipeline = PandasPipeline(stages=[data_to_image, detector, draw])
 
-    # Verify the pipeline result
-    assert result is not None
-    assert "image_with_boxes" in result.columns
-    assert "boxes" in result.columns
+        # Run the pipeline on the input image file
+        result = pipeline.fromFile(receipt_file)
 
-    # Verify the draw stage output
-    draw_result = result["image_with_boxes"][0]
-    assert draw_result.exception == ""
+        # Verify the pipeline result
+        assert result is not None
+        assert "image_with_boxes" in result.columns
+        assert "boxes" in result.columns
 
-    # Verify the Detector stage output
-    bboxes = result["boxes"][0].bboxes
-    assert len(bboxes) > 0
+        # Verify the draw stage output
+        draw_result = result["image_with_boxes"][0]
+        assert draw_result.exception == ""
 
-    # Save the output image to a temporary file for verification
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
-        temp.write(draw_result.data)
-        temp.close()
+        # Verify the Detector stage output
+        bboxes = result["boxes"][0].bboxes
+        assert len(bboxes) > 0
 
-        # Print the path to the temporary file
-        print("file://" + temp.name)
+        # Save the output image to a temporary file for verification
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
+            temp.write(draw_result.data)
+            temp.close()
 
-    unpathSparkFunctions(pyspark)
+            # Print the path to the temporary file
+            print("file://" + temp.name)
+
+    finally:
+        # Clean up Spark functions
+        unpathSparkFunctions(pyspark)
