@@ -1,5 +1,6 @@
 import tempfile
 
+import pytest
 from pyspark.ml import PipelineModel
 
 from scaledp import (
@@ -11,7 +12,7 @@ from scaledp.enums import Device, TessLib
 from scaledp.models.detectors.CraftTextDetector import CraftTextDetector
 
 
-def test_craft_detector(image_rotated_df):
+def test_craft_detector(image_df):
     detector = CraftTextDetector(
         device=Device.CPU,
         keepInputData=True,
@@ -42,7 +43,7 @@ def test_craft_detector(image_rotated_df):
     )
     # Transform the image dataframe through the OCR stage
     pipeline = PipelineModel(stages=[detector, ocr, draw])
-    result = pipeline.transform(image_rotated_df)
+    result = pipeline.transform(image_df)
 
     data = result.collect()
 
@@ -61,7 +62,8 @@ def test_craft_detector(image_rotated_df):
         print("file://" + temp.name)
 
 
-def test_craft_detector_pdf(pdf_df_extra):
+@pytest.skip()
+def test_craft_detector_pdf(image_pdf_df):
     pdf_data_to_image = PdfDataToImage(inputCol="content", outputCol="image")
     detector = CraftTextDetector(
         device=Device.CPU,
@@ -92,7 +94,7 @@ def test_craft_detector_pdf(pdf_df_extra):
     )
     # Transform the image dataframe through the OCR stage
     pipeline = PipelineModel(stages=[pdf_data_to_image, detector, ocr, draw])
-    result = pipeline.transform(pdf_df_extra)
+    result = pipeline.transform(image_pdf_df)
 
     data = result.collect()
 

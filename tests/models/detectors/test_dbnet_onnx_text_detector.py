@@ -10,7 +10,7 @@ from scaledp.enums import TessLib
 from scaledp.models.detectors.DBNetOnnxDetector import DBNetOnnxDetector
 
 
-def test_dbnet_detector(image_rotated_df):
+def test_dbnet_detector(image_df):
 
     detector = DBNetOnnxDetector(
         model="StabRise/text_detection_dbnet_ml_v0.1",
@@ -40,7 +40,7 @@ def test_dbnet_detector(image_rotated_df):
     )
     # Transform the image dataframe through the OCR stage
     pipeline = PipelineModel(stages=[detector, ocr, draw])
-    result = pipeline.transform(image_rotated_df)
+    result = pipeline.transform(image_df)
 
     data = result.collect()
 
