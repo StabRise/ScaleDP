@@ -8,7 +8,7 @@ from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 from pyspark.pandas import DataFrame
-from pyspark.sql.functions import posexplode_outer, udf
+from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType, Row
 
 from scaledp.enums import ImageType
@@ -26,6 +26,7 @@ from scaledp.params import (
     Params,
     TypeConverters,
 )
+from scaledp.pipeline.PandasPipeline import posexplode
 from scaledp.schemas.Image import Image
 
 
@@ -111,21 +112,18 @@ class PdfDataToImage(
         input_col = self._validate(self.getInputCol(), dataset)
         path_col = dataset[self.getPathCol()]
 
-        sel_col = [
-            *dataset.columns,
-            *[
-                posexplode_outer(
-                    udf(self.transform_udf, ArrayType(Image.get_schema()))(
-                        input_col,
-                        path_col,
-                    ),
-                ).alias(self.getPageCol(), out_col),
-            ],
-        ]
+        df_1 = dataset.withColumn(
+            "temp_data",
+            udf(self.transform_udf, ArrayType(Image.get_schema()))(
+                input_col,
+                path_col,
+            ),
+        )
 
-        result = dataset.select(*sel_col)
+        result = posexplode(df_1, "temp_data", self.getPageCol(), out_col)
+
         if not self.getKeepInputData():
-            result = result.drop(input_col)
+            result = result.drop(self.getInputCol())
         return result
 
     def getPageLimit(self) -> int:

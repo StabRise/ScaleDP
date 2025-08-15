@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, ClassVar, List
 
 import pandas as pd
+import pyspark.sql.functions as f
 from pyspark.ml import Transformer
 
 
@@ -49,6 +50,11 @@ def lit(value) -> Any:
     return itertools.repeat(value)
 
 
+def explode(col: Any) -> Any:
+    """Exploding."""
+    return col
+
+
 def _invoke_function(name: str, *args: Any) -> Any:
     if name == "lit":
         return lit(*args)
@@ -72,6 +78,39 @@ def unpathSparkFunctions(pyspark: Any) -> None:
     pyspark.sql.functions._invoke_function = temp_functions["invoke_function"]
 
 
+def posexplode(df, in_col, pos_col="page", val_col="value"):
+    """Explode a column of lists into multiple rows, with position index."""
+
+    def to_list(x):
+        val = x[in_col]
+        if not isinstance(val, list):
+            try:
+                val = list(val)  # will work for generator, tuple, etc.
+            except TypeError:
+                val = [val]
+        return DatasetPd({pos_col: range(len(val)), val_col: val})
+
+    ret = None
+    if isinstance(df, pd.DataFrame):
+        out = df[[in_col]].apply(to_list, axis=1)
+        out = pd.concat(out.tolist(), keys=df.index).reset_index()
+        ret = DatasetPd(
+            df.drop(in_col).merge(out, left_index=True, right_on="level_0"),
+        )
+    else:
+        sel_col = [
+            *df.columns,
+            *[
+                f.posexplode(
+                    f.col(in_col),
+                ).alias(pos_col, val_col),
+            ],
+        ]
+
+        ret = df.select(*sel_col)
+    return ret
+
+
 class DatasetPd(pd.DataFrame):
 
     def withColumn(self, name, col) -> "DatasetPd":
@@ -82,13 +121,16 @@ class DatasetPd(pd.DataFrame):
         return self
 
     def drop(self, col) -> "DatasetPd":
-        return self
+        return DatasetPd(super().drop(columns=[col]))
 
     def repartition(self, numPartitions) -> "DatasetPd":
         return self
 
     def coalesce(self, numPartitions) -> "DatasetPd":
         return self
+
+    def select(self, *args: Any):
+        return self[list(args)]
 
 
 class PandasPipeline:
@@ -119,7 +161,7 @@ class PandasPipeline:
     def fromPandas(self, data: pd.DataFrame) -> Any:
 
         start_time_total = time.time()
-        execution_times = {"stages": []}
+        execution_times = {"stages": {}}
         data = DatasetPd(data)
         for stage in self.stages:
 
@@ -128,17 +170,19 @@ class PandasPipeline:
             data = stage._transform(data)
 
             stage_duration = time.time() - start_time_stage
-            execution_times["stages"].append({stage_name: stage_duration})
+            execution_times["stages"][stage_name] = round(stage_duration, 4)
             logging.info(
                 f"Stage {stage_name} completed in {stage_duration:.2f} seconds",
             )
 
-        total_duration = time.time() - start_time_total
+        total_duration = round(time.time() - start_time_total, 4)
         execution_times["total"] = total_duration
         logging.info(f"Total execution time: {total_duration:.2f} seconds")
 
         # Add execution time information as a new column
-        return data.withColumn("execution_time", [json.dumps(execution_times)])
+        data["execution_time"] = json.dumps(execution_times)
+
+        return data
 
     def fromDict(self, data: dict) -> Any:
         data = DatasetPd(data)

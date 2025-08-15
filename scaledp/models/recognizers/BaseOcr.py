@@ -262,7 +262,7 @@ class BaseOcr(
                 ),
             )
         if not self.getKeepInputData():
-            result = result.drop(input_col)
+            result = result.drop(self.getInputCol())
         return result
 
     def setLineTolerance(self, value):

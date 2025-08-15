@@ -58,8 +58,17 @@ class SingleImageToPdf(
 
             import img2pdf
 
-            a4inpt = (img2pdf.mm_to_pt(210), img2pdf.mm_to_pt(297))
-            layout_fun = img2pdf.get_layout_fun(a4inpt)
+            a4_width_pt = img2pdf.mm_to_pt(210)
+            a4_height_pt = img2pdf.mm_to_pt(297)
+
+            # Determine if the image should be in portrait or landscape
+            is_portrait = height > width
+            page_size = (
+                (a4_width_pt, a4_height_pt)
+                if is_portrait
+                else (a4_height_pt, a4_width_pt)
+            )
+            layout_fun = img2pdf.get_layout_fun(page_size)
             pdf_bytes = img2pdf.convert(io.BytesIO(image.data), layout_fun=layout_fun)
         except Exception:
             exception = traceback.format_exc()

@@ -1,11 +1,21 @@
 from pathlib import Path
 
+import pyspark
 import pytest
 from PIL import Image as pImage
 
 from scaledp.enums import ImageType
 from scaledp.image.DataToImage import DataToImage
+from scaledp.pipeline.PandasPipeline import pathSparkFunctions, unpathSparkFunctions
 from scaledp.schemas.Image import Image
+
+
+@pytest.fixture
+def patch_spark():
+    """Fixture to handle patching and unpatching of spark functions."""
+    pathSparkFunctions(pyspark)
+    yield
+    unpathSparkFunctions(pyspark)
 
 
 @pytest.fixture
@@ -70,6 +80,20 @@ def pdf_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
+def pdf_df_extra(spark_session, resource_path_root):
+    return spark_session.read.format("binaryFile").load(
+        (resource_path_root / "pdfs/Example3.pdf").absolute().as_posix(),
+    )
+
+
+@pytest.fixture
+def pdf_horizontal_df(spark_session, resource_path_root):
+    return spark_session.read.format("binaryFile").load(
+        (resource_path_root / "pdfs/horizontal.pdf").absolute().as_posix(),
+    )
+
+
+@pytest.fixture
 def image_pdf_df(spark_session, resource_path_root):
     return spark_session.read.format("binaryFile").load(
         (resource_path_root / "pdfs/image_pdf.pdf").absolute().as_posix(),
@@ -103,6 +127,24 @@ def image_line_df(spark_session, resource_path_root):
 def image_receipt_df(spark_session, resource_path_root):
     df = spark_session.read.format("binaryFile").load(
         (resource_path_root / "images" / "receipt.jpg").absolute().as_posix(),
+    )
+    bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
+    return bin_to_image.transform(df)
+
+
+@pytest.fixture
+def image_rotated_df(spark_session, resource_path_root):
+    df = spark_session.read.format("binaryFile").load(
+        (resource_path_root / "images" / "img_rotated.png").absolute().as_posix(),
+    )
+    bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
+    return bin_to_image.transform(df)
+
+
+@pytest.fixture
+def image_qr_code_df(spark_session, resource_path_root):
+    df = spark_session.read.format("binaryFile").load(
+        (resource_path_root / "images" / "QrCode.png").absolute().as_posix(),
     )
     bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
     return bin_to_image.transform(df)

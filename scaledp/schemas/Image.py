@@ -23,8 +23,21 @@ class Image(object):
     width: int = 0
 
     def to_pil(self) -> pImage.Image:
+        """Convert image to PIL Image format."""
         if self.imageType in (ImageType.FILE.value, ImageType.WEBP.value):
             return pImage.open(io.BytesIO(self.data))
+        raise ValueError("Invalid image type.")
+
+    def to_cv2(self):
+        """Convert image to OpenCV format."""
+        import cv2
+        import numpy as np
+
+        if self.imageType in (ImageType.FILE.value, ImageType.WEBP.value):
+            # Convert bytes to numpy array
+            nparr = np.frombuffer(self.data, np.uint8)
+            # Decode the numpy array as an image
+            return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         raise ValueError("Invalid image type.")
 
     def to_io_stream(self) -> io.BytesIO:

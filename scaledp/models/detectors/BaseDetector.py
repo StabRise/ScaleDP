@@ -64,6 +64,13 @@ class BaseDetector(
         typeConverter=TypeConverters.toFloat,
     )
 
+    onlyRotated = Param(
+        Params._dummy(),
+        "onlyRotated",
+        "Return only rotated boxes.",
+        typeConverter=TypeConverters.toBoolean,
+    )
+
     def get_params(self):
         return json.dumps({k.name: v for k, v in self.extractParamMap().items()})
 
@@ -99,8 +106,10 @@ class BaseDetector(
                 exception=image.exception,
             )
         try:
+            logging.info("Convert image")
             image_pil = image.to_pil()
             scale_factor = self.getScaleFactor()
+            logging.info("Resize image")
             if scale_factor != 1.0:
                 resized_image = image_pil.resize(
                     (
@@ -110,7 +119,7 @@ class BaseDetector(
                 )
             else:
                 resized_image = image_pil
-
+            logging.info("Call detector on image")
             result = self.call_detector([(resized_image, image.path)], params)
         except Exception as e:
             exception = traceback.format_exc()
@@ -190,7 +199,7 @@ class BaseDetector(
             )
 
         if not self.getKeepInputData():
-            result = result.drop(input_col)
+            result = result.drop(self.getInputCol())
         return result
 
     def setScaleFactor(self, value):
