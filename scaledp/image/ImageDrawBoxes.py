@@ -1,4 +1,5 @@
 import logging
+import math
 import random
 import traceback
 from types import MappingProxyType
@@ -127,7 +128,7 @@ class ImageDrawBoxes(
                         text.append(val)
         return ":".join(text)
 
-    def transform_udf(self, image, data):
+    def transform_udf(self, image, *data_list: Any):
 
         def get_color():
             return "#{:06x}".format(random.randint(0, 0xFFFFFF))
@@ -146,10 +147,12 @@ class ImageDrawBoxes(
             img1 = ImageDraw.Draw(img)
             fill = self.getColor() if self.getFilled() else None
 
-            if hasattr(data, "entities"):
-                self.draw_ner_boxes(data, fill, get_color, img1)
-            else:
-                self.draw_boxes(data, fill, img1)
+            for data in data_list:
+
+                if hasattr(data, "entities"):
+                    self.draw_ner_boxes(data, fill, get_color, img1)
+                else:
+                    self.draw_boxes(data, fill, img1)
 
         except Exception:
             exception = traceback.format_exc()
@@ -164,13 +167,7 @@ class ImageDrawBoxes(
             box = b
             if not isinstance(box, Box):
                 box = Box(**box.asDict())
-            img1.rounded_rectangle(
-                box.shape(self.getPadding()),
-                outline=color,
-                radius=4,
-                fill=fill,
-                width=self.getLineWidth(),
-            )
+            self.draw_box(box, color, fill, img1)
             text = self.getDisplayText(box)
             if text:
                 img1.text(
@@ -182,6 +179,51 @@ class ImageDrawBoxes(
                     fill=color,
                     font_size=self.getTextSize(),
                 )
+
+    def draw_box(self, box, color, fill, img1):
+        if box.angle == 0:
+            # Draw normal rectangle if angle is 0
+            img1.rounded_rectangle(
+                box.shape(self.getPadding()),
+                outline=color,
+                radius=4,
+                fill=fill,
+                width=self.getLineWidth(),
+            )
+        else:
+            # Draw rotated rectangle for non-zero angles
+            center_x = box.x + box.width / 2
+            center_y = box.y + box.height / 2
+            points = [
+                # Top-left
+                (-box.width / 2, -box.height / 2),
+                # Top-right
+                (box.width / 2, -box.height / 2),
+                # Bottom-right
+                (box.width / 2, box.height / 2),
+                # Bottom-left
+                (-box.width / 2, box.height / 2),
+            ]
+            # Rotate points and translate to center
+            rotated_points = []
+
+            angle_rad = math.radians(box.angle)
+            for px, py in points:
+                # Rotate point
+                rx = px * math.cos(angle_rad) - py * math.sin(angle_rad)
+                ry = px * math.sin(angle_rad) + py * math.cos(angle_rad)
+                # Translate to center
+                rx += center_x
+                ry += center_y
+                rotated_points.append((rx, ry))
+
+            # Draw polygon with rotated points
+            img1.polygon(
+                rotated_points,
+                outline=color,
+                fill=fill,
+                width=self.getLineWidth(),
+            )
 
     def draw_ner_boxes(self, data, fill, get_color, img1):
         black_list = self.getBlackList()
@@ -209,13 +251,8 @@ class ImageDrawBoxes(
                 if not isinstance(box, Box):
                     box = Box(**box.asDict())
                 text = self.getDisplayText(ner)
-                img1.rounded_rectangle(
-                    box.shape(self.getPadding()),
-                    outline=color,
-                    radius=4,
-                    fill=fill,
-                    width=self.getLineWidth(),
-                )
+                self.draw_box(box, color, fill, img1)
+
                 if text:
                     tbox = list(
                         img1.textbbox(
@@ -254,7 +291,7 @@ class ImageDrawBoxes(
     def _transform(self, dataset):
         out_col = self.getOutputCol()
         image_col = self._validate(self.getInputCols()[0], dataset)
-        box_col = self._validate(self.getInputCols()[1], dataset)
+        box_cols = [self._validate(col, dataset) for col in self.getInputCols()[1:]]
 
         dataset = self._preprocessing(dataset)
 
@@ -264,7 +301,7 @@ class ImageDrawBoxes(
             )
         result = dataset.withColumn(
             out_col,
-            udf(self.transform_udf, Image.get_schema())(image_col, box_col),
+            udf(self.transform_udf, Image.get_schema())(image_col, *box_cols),
         )
 
         if not self.getKeepInputData():
