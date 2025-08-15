@@ -32,7 +32,7 @@ class LLMNer(BaseNer, HasLLM, HasPrompt, HasPropagateExc):
 
     defaultParams = MappingProxyType(
         {
-            "inputCol": "text",
+            "inputCols": ["text"],
             "outputCol": "ner",
             "keepInputData": True,
             "whiteList": [],

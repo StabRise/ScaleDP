@@ -6,6 +6,7 @@ import pandas as pd
 from pyspark import keyword_only
 
 from scaledp.models.ner.BaseNer import BaseNer
+from scaledp.schemas.Document import Document
 from scaledp.schemas.Entity import Entity
 from scaledp.schemas.NerOutput import NerOutput
 
@@ -16,7 +17,7 @@ class Ner(BaseNer):
 
     defaultParams = MappingProxyType(
         {
-            "inputCol": "text",
+            "inputCols": ["text"],
             "outputCol": "ner",
             "keepInputData": True,
             "model": "d4data/biomedical-ner-all",
@@ -81,9 +82,19 @@ class Ner(BaseNer):
             )
         return self.pipeline
 
-    def transform_udf(self, text):
+    def transform_udf(self, *documents: list[Document]):
 
         mapping = []
+        typed_document = []
+        if not isinstance(documents[0], Document):
+            for document in documents:
+                typed_document.append(Document(**document.asDict()))
+        else:
+            typed_document = documents
+        text = typed_document[0]
+        for t in typed_document[1:]:
+            text = text.merge(t)
+
         for idx, box in enumerate(text.bboxes):
             mapping.extend([idx] * (len(box.text) + 1))
 

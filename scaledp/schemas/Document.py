@@ -17,5 +17,14 @@ class Document:
     def get_schema():
         return map_dataclass_to_struct(Document)
 
+    def merge(self, document):
+        return Document(
+            path=document.path,
+            text=document.text + "\n" + self.text,
+            type=document.type,
+            bboxes=document.bboxes + self.bboxes,
+            exception=document.exception,
+        )
+
 
 register_type(Document, Document.get_schema)

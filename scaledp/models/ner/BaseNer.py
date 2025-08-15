@@ -17,7 +17,7 @@ from scaledp.params import (
     HasColumnValidator,
     HasDefaultEnum,
     HasDevice,
-    HasInputCol,
+    HasInputCols,
     HasKeepInputData,
     HasModel,
     HasNumPartitions,
@@ -33,7 +33,7 @@ from scaledp.schemas.NerOutput import NerOutput
 
 class BaseNer(
     Transformer,
-    HasInputCol,
+    HasInputCols,
     HasOutputCol,
     HasKeepInputData,
     HasWhiteList,
@@ -114,12 +114,15 @@ class BaseNer(
     def _transform(self, dataset):
         params = self.get_params()
         out_col = self.getOutputCol()
-        in_col = self._validate(self.getInputCol(), dataset)
+        for col in self.getInputCols():
+            if col not in dataset.columns:
+                raise ValueError(f"Column {col} not found in dataset")
+        in_cols = [self._validate(col, dataset) for col in self.getInputCols()]
 
         if not self.getPartitionMap():
             result = dataset.withColumn(
                 out_col,
-                udf(self.transform_udf, NerOutput.get_schema())(in_col),
+                udf(self.transform_udf, NerOutput.get_schema())(*in_cols),
             )
         else:
             if self.getNumPartitions() > 0:
@@ -131,11 +134,11 @@ class BaseNer(
             result = dataset.withColumn(
                 out_col,
                 pandas_udf(self.transform_udf_pandas, self.outputSchema())(
-                    in_col,
+                    *in_cols,
                     lit(params),
                 ),
             )
 
         if not self.getKeepInputData():
-            result = result.drop(in_col)
+            result = result.drop(*in_cols)
         return result
