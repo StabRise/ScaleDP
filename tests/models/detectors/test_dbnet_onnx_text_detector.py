@@ -1,3 +1,4 @@
+import logging
 import tempfile
 
 from pyspark.ml import PipelineModel
@@ -56,4 +57,4 @@ def test_dbnet_detector(image_df):
         temp.close()
 
         # Print the path to the temporary file
-        print("file://" + temp.name)
+        logging.info("file://" + temp.name)

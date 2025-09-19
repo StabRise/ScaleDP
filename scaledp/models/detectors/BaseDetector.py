@@ -122,6 +122,7 @@ class BaseDetector(
             logging.info("Call detector on image")
             result = self.call_detector([(resized_image, image.path)], params)
         except Exception as e:
+            raise e
             exception = traceback.format_exc()
             exception = (
                 f"{self.uid}: Error in object detection: {exception}, {image.exception}"

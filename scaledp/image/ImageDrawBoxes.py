@@ -162,11 +162,20 @@ class ImageDrawBoxes(
         return Image.from_pil(img, image.path, image.imageType, image.resolution)
 
     def draw_boxes(self, data, fill, img1):
-        color = "green" if self.getColor() is None else self.getColor()
+        colors = {}
         for b in data.bboxes:
             box = b
             if not isinstance(box, Box):
                 box = Box(**box.asDict())
+
+            # Group by Box.text field for color consistency
+            text_key = box.text if hasattr(box, "text") and box.text else "default"
+
+            if text_key not in colors:
+                colors[text_key] = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+
+            color = colors[text_key] if self.getColor() is None else self.getColor()
+
             self.draw_box(box, color, fill, img1)
             text = self.getDisplayText(box)
             if text:
