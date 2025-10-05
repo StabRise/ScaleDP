@@ -88,6 +88,15 @@ class DBNetOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
             if params["onlyRotated"]:
                 boxes = [box for box in boxes if box.is_rotated()]
 
+            # Merge overlapping boxes before returning, only if on the same line and similar angle
+            boxes = Box.merge_overlapping_boxes(
+                boxes,
+                iou_threshold=0.02,  # as before
+                angle_thresh=10.0,  # only merge if angle difference < 10 degrees
+                line_thresh=0.3,  # only merge if centers are close (half
+                # height)
+            )
+
             results_final.append(
                 DetectorOutput(path=image_path, type="DBNetOnnx", bboxes=boxes),
             )

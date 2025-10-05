@@ -113,7 +113,7 @@ def test_llm_visual_extractor_pandas(receipt_file, receipt_json, receipt_json_pa
     pathSparkFunctions(pyspark)
     data_to_image = DataToImage()
     extractor = LLMVisualExtractor(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         schema=ReceiptSchema,
         propagateError=True,
     )
@@ -195,7 +195,7 @@ def test_llm_visual_extractor_prompt_schema(
 ):
 
     extractor = LLMVisualExtractor(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         schema=ReceiptSchema1,
         propagateError=False,
         schemaByPrompt=True,

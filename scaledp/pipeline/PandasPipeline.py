@@ -2,6 +2,7 @@ import itertools
 import json
 import logging
 import time
+from concurrent.futures import ThreadPoolExecutor  # <-- added
 from pathlib import Path
 from typing import Any, ClassVar, List
 
@@ -38,8 +39,10 @@ class UserDefinedFunction:
         self.returnType = returnType
 
     def __call__(self, *cols: Any) -> Any:
-        cols = zip(*cols)
-        return [self.func(*i) for i in cols]
+        cols = list(zip(*cols))
+        with ThreadPoolExecutor() as executor:
+            results = list(executor.map(lambda args: self.func(*args), cols))
+        return results
 
     def _wrapped(self) -> Any:
         return self

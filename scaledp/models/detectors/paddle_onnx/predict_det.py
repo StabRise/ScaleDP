@@ -13,7 +13,7 @@ class DBNetTextDetector(PredictBase):
         pre_process_list = [
             {
                 "DetResizeForTest": {
-                    "image_shape": [960, 960],
+                    "image_shape": [1280, 1280],
                     # "limit_side_len": 960,
                     # "resize_long": 960,
                     "limit_type": "max",
@@ -33,10 +33,10 @@ class DBNetTextDetector(PredictBase):
         ]
         postprocess_params = {}
         postprocess_params["name"] = "DBPostProcess"
-        postprocess_params["thresh"] = 0.3  # args.det_db_thresh
-        postprocess_params["box_thresh"] = 0.4  # args.det_db_box_thresh
+        postprocess_params["thresh"] = 0.5  # args.det_db_thresh
+        postprocess_params["box_thresh"] = 0.3  # args.det_db_box_thresh
         postprocess_params["max_candidates"] = 1000
-        postprocess_params["unclip_ratio"] = 1.7  # args.det_db_unclip_ratio
+        postprocess_params["unclip_ratio"] = 2.5  # 1.7  # args.det_db_unclip_ratio
         postprocess_params["use_dilation"] = False  # args.use_dilation
         postprocess_params["score_mode"] = "fast"  # args.det_db_score_mode
         postprocess_params["box_type"] = "quad"  # args.det_box_type

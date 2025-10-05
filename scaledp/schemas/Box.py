@@ -154,7 +154,113 @@ class Box:
         )
 
     def is_rotated(self) -> bool:
-        return abs(self.angle) >= 10
+        return abs(self.angle) >= 3
+
+    @staticmethod
+    def iou(box1: "Box", box2: "Box") -> float:
+        """Compute Intersection over Union (IoU) between two boxes."""
+        x1 = max(box1.x, box2.x)
+        y1 = max(box1.y, box2.y)
+        x2 = min(box1.x + box1.width, box2.x + box2.width)
+        y2 = min(box1.y + box1.height, box2.y + box2.height)
+        inter_area = max(0, x2 - x1) * max(0, y2 - y1)
+        if inter_area == 0:
+            return 0.0
+        box1_area = box1.width * box1.height
+        box2_area = box2.width * box2.height
+        union_area = box1_area + box2_area - inter_area
+        return inter_area / union_area
+
+    @staticmethod
+    def merge(box1: "Box", box2: "Box") -> "Box":
+        """Merge two boxes into one by taking the minimal bounding rectangle."""
+        x1 = min(box1.x, box2.x)
+        y1 = min(box1.y, box2.y)
+        x2 = max(box1.x + box1.width, box2.x + box2.width)
+        y2 = max(box1.y + box1.height, box2.y + box2.height)
+        return Box(
+            text=box1.text or box2.text,
+            score=max(box1.score, box2.score),
+            x=x1,
+            y=y1,
+            width=x2 - x1,
+            height=y2 - y1,
+            angle=0.0,
+        )
+
+    @staticmethod
+    def is_on_same_line(
+        box1: "Box",
+        box2: "Box",
+        angle_thresh: float = 10.0,
+        line_thresh: float = 0.5,
+    ) -> bool:
+        """Check if two boxes are on the same text line.
+
+        - angle_thresh: maximum allowed angle difference (degrees)
+        - line_thresh: maximum allowed normalized center difference
+        (as a fraction of height for horizontal text)
+        """
+        # Check angle similarity
+        ret = None
+        if abs(box1.angle - box2.angle) > angle_thresh:
+            return False
+        # For horizontal text (angle near 0)
+        if abs(box1.angle) < angle_thresh:
+            # Check if vertical centers are close
+            y1 = box1.y + box1.height / 2
+            y2 = box2.y + box2.height / 2
+            avg_height = (box1.height + box2.height) / 2
+            ret = abs(y1 - y2) < avg_height * line_thresh
+        else:
+            # For rotated text, project centers onto the perpendicular direction
+            import math
+
+            theta = math.radians(box1.angle)
+            # Direction perpendicular to text line
+            dx = -math.sin(theta)
+            dy = math.cos(theta)
+            c1x = box1.x + box1.width / 2
+            c1y = box1.y + box1.height / 2
+            c2x = box2.x + box2.width / 2
+            c2y = box2.y + box2.height / 2
+            # Project difference onto perpendicular direction
+            perp_dist = abs((c2x - c1x) * dx + (c2y - c1y) * dy)
+            avg_dim = (box1.height + box2.height) / 2
+            ret = perp_dist < avg_dim * line_thresh
+        return ret
+
+    @staticmethod
+    def merge_overlapping_boxes(
+        boxes: list["Box"],
+        iou_threshold: float = 0.3,
+        angle_thresh: float = 10.0,
+        line_thresh: float = 0.5,
+    ) -> list["Box"]:
+        """
+        Merge all overlapping boxes in a list using a greedy algorithm,
+        but only if they are on the same line and have similar angle.
+        """
+        merged = []
+        used = [False] * len(boxes)
+        for i, box in enumerate(boxes):
+            if used[i]:
+                continue
+            curr = box
+            for j in range(i + 1, len(boxes)):
+                if used[j]:
+                    continue
+                if Box.iou(curr, boxes[j]) > iou_threshold and Box.is_on_same_line(
+                    curr,
+                    boxes[j],
+                    angle_thresh=angle_thresh,
+                    line_thresh=line_thresh,
+                ):
+                    curr = Box.merge(curr, boxes[j])
+                    used[j] = True
+            merged.append(curr)
+            used[i] = True
+        return merged
 
 
 register_type(Box, Box.get_schema)

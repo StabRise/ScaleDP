@@ -2,7 +2,7 @@ import gc
 import logging
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 from huggingface_hub import hf_hub_download
@@ -18,7 +18,7 @@ from scaledp.schemas.DetectorOutput import DetectorOutput
 
 
 class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
-    _model = None
+    _model: ClassVar = {}
 
     task = Param(
         Params._dummy(),
@@ -56,20 +56,25 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
     @classmethod
     def get_model(cls, params):
 
-        logging.info("Loading model...")
-        if cls._model:
-            return cls._model
+        model_path = params["model"]
 
-        model = params["model"]
-        if not Path(model).is_file():
-            model = hf_hub_download(repo_id=model, filename="model.onnx")
+        logging.info("Loading model...")
+        if cls._model and model_path in cls._model:
+            return cls._model.get(model_path)
+
+        model_path_final = model_path
+        if not Path(model_path).is_file():
+            model_path_final = hf_hub_download(
+                repo_id=model_path,
+                filename="model.onnx",
+            )
 
         logging.info("Model downloaded")
 
-        detector = YOLO(model, params["scoreThreshold"])
+        detector = YOLO(model_path_final, params["scoreThreshold"])
 
-        cls._model = detector
-        return cls._model
+        cls._model[model_path] = detector
+        return cls._model[model_path]
 
     @classmethod
     def call_detector(cls, images, params):

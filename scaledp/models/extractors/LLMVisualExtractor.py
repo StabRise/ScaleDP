@@ -24,7 +24,7 @@ class LLMVisualExtractor(BaseVisualExtractor, HasLLM, HasSchema, HasPrompt):
             "inputCol": "image",
             "outputCol": "data",
             "keepInputData": True,
-            "model": "gemini-1.5-flash",
+            "model": "gemini-2.5-flash",
             "apiBase": None,
             "apiKey": None,
             "numPartitions": 1,
