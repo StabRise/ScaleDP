@@ -14,6 +14,7 @@ from scaledp.image.ImageCropBoxes import ImageCropBoxes
 from scaledp.image.ImageDrawBoxes import ImageDrawBoxes
 from scaledp.models.detectors.DocTRTextDetector import DocTRTextDetector
 from scaledp.models.detectors.LayoutDetector import LayoutDetector
+from scaledp.models.detectors.SignatureDetector import SignatureDetector
 from scaledp.models.detectors.YoloDetector import YoloDetector
 from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 from scaledp.models.extractors.DSPyExtractor import DSPyExtractor
@@ -214,6 +215,7 @@ __all__ = [
     "DocTROcr",
     "YoloDetector",
     "YoloOnnxDetector",
+    "SignatureDetector",
     "ImageCropBoxes",
     "DSPyExtractor",
     "TesseractRecognizer",

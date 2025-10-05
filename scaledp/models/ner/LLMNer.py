@@ -44,7 +44,7 @@ class LLMNer(BaseNer, HasLLM, HasPrompt, HasPropagateExc):
             "pathCol": "path",
             "systemPrompt": "You are excellent NER tag extractor.",
             "prompt": """Please extract text from the image.""",
-            "model": "gemini-1.5-flash-8b",
+            "model": "gemini-2.5-flash-lite",
             "apiBase": "",
             "apiKey": "",
             "delay": 30,

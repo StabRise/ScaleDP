@@ -24,6 +24,20 @@ def image_file(resource_path_root):
 
 
 @pytest.fixture
+def image_rotated_text_file(resource_path_root):
+    return (resource_path_root / "images/RotatedText1.png").absolute().as_posix()
+
+
+@pytest.fixture
+def image_rotated_text_df(spark_session, image_rotated_text_file):
+    df = spark_session.read.format("binaryFile").load(
+        image_rotated_text_file,
+    )
+    bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
+    return bin_to_image.transform(df)
+
+
+@pytest.fixture
 def receipt_file(resource_path_root):
     return (resource_path_root / "images" / "receipt.jpg").absolute().as_posix()
 
@@ -101,8 +115,25 @@ def image_pdf_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
+def signatures_pdf_df(spark_session, resource_path_root):
+    return spark_session.read.format("binaryFile").load(
+        (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix(),
+    )
+
+
+@pytest.fixture
+def signatures_pdf_file(spark_session, resource_path_root):
+    return (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix()
+
+
+@pytest.fixture
 def pdf_file(resource_path_root):
     return (resource_path_root / "pdfs/unipdf-medical-bill.pdf").absolute().as_posix()
+
+
+@pytest.fixture
+def pdf_report_file(resource_path_root):
+    return (resource_path_root / "pdfs/sample-report.pdf").absolute().as_posix()
 
 
 @pytest.fixture
@@ -145,6 +176,15 @@ def image_rotated_df(spark_session, resource_path_root):
 def image_qr_code_df(spark_session, resource_path_root):
     df = spark_session.read.format("binaryFile").load(
         (resource_path_root / "images" / "QrCode.png").absolute().as_posix(),
+    )
+    bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
+    return bin_to_image.transform(df)
+
+
+@pytest.fixture
+def image_signature_df(spark_session, resource_path_root):
+    df = spark_session.read.format("binaryFile").load(
+        (resource_path_root / "images" / "signature.png").absolute().as_posix(),
     )
     bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
     return bin_to_image.transform(df)
