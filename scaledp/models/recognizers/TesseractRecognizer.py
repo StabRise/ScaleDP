@@ -2,10 +2,12 @@ import logging
 from types import MappingProxyType
 from typing import Any
 
+import cv2
 import numpy as np
 from pyspark import keyword_only
 from pyspark.ml.param import Param, Params, TypeConverters
 
+from scaledp.models.detectors.HasDetectLineOrientation import HasDetectLineOrientation
 from scaledp.params import CODE_TO_LANGUAGE, LANGUAGE_TO_TESSERACT_CODE
 from scaledp.schemas.Box import Box
 from scaledp.schemas.Document import Document
@@ -14,7 +16,7 @@ from ...enums import OEM, PSM, TessLib
 from .BaseRecognizer import BaseRecognizer
 
 
-class TesseractRecognizer(BaseRecognizer):
+class TesseractRecognizer(BaseRecognizer, HasDetectLineOrientation):
     """
     Run Tesseract text recognition on images.
     """
@@ -40,6 +42,13 @@ class TesseractRecognizer(BaseRecognizer):
         typeConverter=TypeConverters.toInt,
     )
 
+    onlyRotated = Param(
+        Params._dummy(),
+        "onlyRotated",
+        "Return only rotated boxes.",
+        typeConverter=TypeConverters.toBoolean,
+    )
+
     defaultParams = MappingProxyType(
         {
             "inputCols": ["image", "boxes"],
@@ -57,6 +66,9 @@ class TesseractRecognizer(BaseRecognizer):
             "numPartitions": 0,
             "pageCol": "page",
             "pathCol": "path",
+            "detectLineOrientation": True,
+            "onlyRotated": True,
+            "oriModel": "StabRise/line_orientation_detection_v0.1",
         },
     )
 
@@ -77,17 +89,8 @@ class TesseractRecognizer(BaseRecognizer):
 
     @classmethod
     def _prepare_box_for_ocr(cls, image_np, box, params):
-        import cv2
-
-        # Ensure box is Box instance
-        if isinstance(box, dict):
-            box = Box(**box)
-        elif not isinstance(box, Box):
-            box = Box(**box.asDict())
 
         scaled_box = box.scale(params["scaleFactor"], padding=5)
-        if scaled_box.angle == 90:
-            scaled_box.angle = -90
 
         center_tuple = (
             scaled_box.x + scaled_box.width / 2,
@@ -122,7 +125,6 @@ class TesseractRecognizer(BaseRecognizer):
 
     @classmethod
     def _convert_to_pil(cls, cropped_np):
-        import cv2
         from PIL import Image
 
         if cropped_np is None or cropped_np.size == 0:
@@ -151,10 +153,28 @@ class TesseractRecognizer(BaseRecognizer):
             lang=lang,
         ) as api:
             api.SetVariable("debug_file", "ocr.log")
-            for box in detected_boxes.bboxes:
+            for box_raw in detected_boxes.bboxes:
+                # Ensure box is Box instance
+                if isinstance(box_raw, dict):
+                    box = Box(**box_raw)
+                elif not isinstance(box_raw, Box):
+                    box = Box(**box_raw.asDict())
+                else:
+                    box = box_raw
                 cropped_np = cls._prepare_box_for_ocr(image_np, box, params)
+                # Auto-orient the image before OCR
+
                 pil_image = cls._convert_to_pil(cropped_np)
+                if params["detectLineOrientation"]:
+                    pil_image, orientation = cls.auto_orient_image(pil_image, params)
                 if pil_image is None:
+                    continue
+
+                if (
+                    params["onlyRotated"]
+                    and not box.is_rotated()
+                    and orientation != "180_degree"
+                ):
                     continue
 
                 api.SetImage(pil_image)
@@ -164,7 +184,6 @@ class TesseractRecognizer(BaseRecognizer):
                     b = Box(**b)
                 b.text = api.GetUTF8Text()
                 b.conf = api.MeanTextConf()
-
                 if b.score > params["scoreThreshold"]:
                     boxes.append(b)
                     texts.append(b.text)
@@ -199,12 +218,9 @@ class TesseractRecognizer(BaseRecognizer):
 
         results = []
         lang = cls.getLangTess(params)
-        with PyTessBaseAPI(
-            path=params["tessDataPath"],
-            psm=PSM.SINGLE_WORD,
-            oem=params["oem"],
-            lang=lang,
-        ) as api:
+        with PyTessBaseAPI() as api:
+            api.Init(params["tessDataPath"], lang, oem=params["oem"])
+            api.SetPageSegMode(PSM.SINGLE_WORD)
             api.SetVariable("debug_file", "ocr.log")
 
             for (image, image_path), detected_box in zip(images, detected_boxes):
