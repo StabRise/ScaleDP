@@ -37,7 +37,7 @@ def test_llm_extractor(image_receipt_df):
     )
 
     # Initialize the NER stage with the specified model and device
-    extractor = LLMExtractor(model="gemini-1.5-flash", schema=ReceiptSchema)
+    extractor = LLMExtractor(model="gemini-2.5-flash", schema=ReceiptSchema)
 
     # Transform the image dataframe through the OCR and NER stages
     result_df = extractor.transform(ocr.transform(image_receipt_df))

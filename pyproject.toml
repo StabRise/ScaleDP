@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scaledp"
-version = "0.2.3rc48"
+version = "0.2.4rc5"
 description = "ScaleDP is a library for processing documents using Apache Spark and LLMs"
 authors = ["Mykola Melnyk <mykola@stabrise.com>"]
 repository = "https://github.com/StabRise/scaledp"
@@ -41,6 +41,7 @@ sparkdantic = "^2.0.0"
 img2pdf = "^0.6.1"
 shapely = "^2.1.1"
 pyclipper = "^1.3.0.post6"
+onnxruntime = "1.22.0"
 
 
 

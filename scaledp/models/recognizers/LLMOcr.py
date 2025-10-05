@@ -36,7 +36,7 @@ class LLMOcr(BaseOcr, HasLLM, HasPrompt):
             "pathCol": "path",
             "systemPrompt": "You are ocr.",
             "prompt": """Please extract text from the image.""",
-            "model": "gemini-1.5-flash",
+            "model": "gemini-2.5-flash",
             "apiBase": None,
             "apiKey": None,
             "delay": 30,
