@@ -1,7 +1,7 @@
 import tempfile
 
 import pyspark
-from pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
+from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
 from pyspark.ml import PipelineModel
 
 from scaledp import (

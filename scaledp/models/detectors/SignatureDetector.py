@@ -1,4 +1,4 @@
-from scaledp import YoloOnnxDetector
+from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 
 
 class SignatureDetector(YoloOnnxDetector):

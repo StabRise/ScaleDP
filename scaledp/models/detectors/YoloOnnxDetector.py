@@ -82,13 +82,14 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
         detector = cls.get_model(params)
 
         logging.info("Process images")
+        print("process")
         results_final = []
         for image, image_path in images:
             boxes = []
             # Convert PIL to NumPy (RGB)
             image_np = np.array(image)
             raw_boxes, scores, class_ids = detector.detect_objects(image_np)
-
+            print("detected")
             for box in raw_boxes:
                 boxes.append(Box.from_bbox(box))
             results_final.append(

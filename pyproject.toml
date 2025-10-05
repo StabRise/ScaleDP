@@ -26,10 +26,13 @@ surya-ocr = {version = "0.8.1", optional = true}
 easyocr = {version = "1.7.2", optional = true}
 python-doctr = {version = "0.10.0", optional = true}
 transformers = {version = "^4.36.0", optional = true}
-torchvision= {version= ">=0.18.0", source = "pytorch_cpu", optional = true}
+torchvision= [
+    {version = ">=0.18.0", markers="sys_platform == 'darwin'", optional = true },
+    {version= ">=0.18.0", markers="sys_platform != 'darwin'", source = "pytorch_cpu", optional = true}
+    ]
 torch =  [
-    #{version = "==2.2.0", platform = "darwin", optional = true },
-    {version = ">=2.4.1", source = "pytorch_cpu", optional = true}
+    {version = "==2.4.1", markers="sys_platform == 'darwin'", optional = true },
+    {version = ">=2.4.1", markers="sys_platform != 'darwin'", source = "pytorch_cpu", optional = true}
 ]
 #dspy = {version = "2.5.43", optional = true}
 levenshtein = "^0.27.1"
@@ -46,7 +49,10 @@ onnxruntime = "1.22.0"
 
 
 [tool.poetry.extras]
-ml = ["transformers", "torch", "torchvision"]
+ml = ["transformers",
+    #"torch",
+    #"torchvision"
+]
 ocr = ["easyocr", "python-doctr", "surya-ocr"]
 llm = ["dspy"]
 paddle = ["paddleocr", "paddlepaddle",]
@@ -67,8 +73,12 @@ pytest-resource-path = "1.3.0"
 coverage = "7.6.4"
 pytest-cov="5.0.0"
 transformers = "^4.36.0"
-torchvision= {version= ">=0.18.0", source = "pytorch_cpu"}
-torch = {version= ">=2.4.1", source = "pytorch_cpu"}
+#torchvision= {version= ">=0.18.0", source = "pytorch_cpu"}
+#torch = {version= ">=2.4.1", source = "pytorch_cpu"}
+torch =  [
+    {version = "==2.4.1", markers="sys_platform == 'darwin'", optional = true },
+    {version = ">=2.4.1", markers="sys_platform != 'darwin'", source = "pytorch_cpu", optional = true}
+]
 python-doctr  = "0.10.0"
 surya-ocr = "0.8.1"
 black = "^24.10.0"

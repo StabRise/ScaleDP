@@ -149,7 +149,7 @@ class PandasPipeline:
         self.setStages(stages)
 
     def fromFile(self, filename: str) -> Any:
-        with Path.open(filename, "rb") as f:
+        with Path(filename).open("rb") as f:
             data = f.read()
 
         data = DatasetPd({"content": [data], "path": [filename], "resolution": [0]})
