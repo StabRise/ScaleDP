@@ -28,7 +28,11 @@ from scaledp.models.recognizers.LLMOcr import LLMOcr
 from scaledp.models.recognizers.SuryaOcr import SuryaOcr
 from scaledp.models.recognizers.TesseractOcr import TesseractOcr
 from scaledp.models.recognizers.TesseractRecognizer import TesseractRecognizer
+from scaledp.pdf.PdfAddTextLayer import PdfAddTextLayer
+from scaledp.pdf.PdfAssembler import PdfAssembler
+from scaledp.pdf.PdfDataToDocument import PdfDataToDocument
 from scaledp.pdf.PdfDataToImage import PdfDataToImage
+from scaledp.pdf.PdfDataToSingleImage import PdfDataToSingleImage
 from scaledp.text.TextToDocument import TextToDocument
 from scaledp.utils.show_utils import (
     show_image,
@@ -224,6 +228,10 @@ __all__ = [
     "LLMExtractor",
     "LLMOcr",
     "LLMNer",
+    "PdfDataToDocument",
+    "PdfDataToSingleImage",
+    "PdfAddTextLayer",
+    "PdfAssembler",
     "__version__",
     "files",
     *dir(enums),

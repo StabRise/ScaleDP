@@ -10,7 +10,6 @@ from scaledp import (
     SignatureDetector,
 )
 from scaledp.enums import Device
-from scaledp.pdf.PdfDataToSingleImage import PdfDataToSingleImage
 
 
 def test_signature_detector(image_signature_df):
@@ -20,9 +19,8 @@ def test_signature_detector(image_signature_df):
         keepInputData=True,
         partitionMap=True,
         numPartitions=0,
-        scoreThreshold=0.25,
         task="detect",
-        model="/home/mykola/PycharmProjects/scaledp-models/detection/document/signature/detector_yolo_1cls.onnx",
+        model="StabRise/signature_detection",
     )
 
     draw = ImageDrawBoxes(
@@ -56,28 +54,24 @@ def test_signature_detector(image_signature_df):
 
 def test_signature_pdf_detector(signatures_pdf_df):
 
-    pdf = PdfDataToSingleImage(outputCol="image", keepInputData=True)
-
-    detector = SignatureDetector(
-        device=Device.CPU,
-        keepInputData=True,
-        partitionMap=False,
-        numPartitions=0,
-        scoreThreshold=0.25,
-        task="detect",
-        model="/home/mykola/PycharmProjects/scaledp-models/detection/document/signature/detector_yolo_1cls.onnx",
+    pipeline = PipelineModel(
+        stages=[
+            PdfDataToImage(outputCol="image"),
+            SignatureDetector(
+                device=Device.CPU,
+                keepInputData=True,
+                outputCol="signatures",
+                scoreThreshold=0.20,
+                model="StabRise/signature_detection",
+            ),
+            ImageDrawBoxes(
+                keepInputData=True,
+                inputCols=["image", "signatures"],
+                filled=True,
+                color="black",
+            ),
+        ],
     )
-
-    draw = ImageDrawBoxes(
-        keepInputData=True,
-        inputCols=["image", "boxes"],
-        filled=False,
-        color="green",
-        lineWidth=5,
-        displayDataList=["score", "angle"],
-    )
-    # Transform the image dataframe through the OCR stage
-    pipeline = PipelineModel(stages=[pdf, detector, draw])
     result = pipeline.transform(signatures_pdf_df)
 
     data = result.collect()
