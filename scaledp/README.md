@@ -37,9 +37,13 @@
 
 ```bash
   poetry version patch
-  poetry publish --build
 ```
 
+### Publish
+
+```bash
+poetry publish --build
+```
 
 ## Pre-commit
 
@@ -53,3 +57,7 @@ To run pre-commit on all files:
 pre-commit run --all-files
 ```
 
+
+## Deps
+
+crafter
