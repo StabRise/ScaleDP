@@ -13,11 +13,11 @@ from scaledp.image.DataToImage import DataToImage
 from scaledp.image.ImageCropBoxes import ImageCropBoxes
 from scaledp.image.ImageDrawBoxes import ImageDrawBoxes
 from scaledp.models.detectors.DocTRTextDetector import DocTRTextDetector
+from scaledp.models.detectors.FaceDetector import FaceDetector
 from scaledp.models.detectors.LayoutDetector import LayoutDetector
+from scaledp.models.detectors.SignatureDetector import SignatureDetector
 from scaledp.models.detectors.YoloDetector import YoloDetector
 from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
-from scaledp.models.detectors.FaceDetector import FaceDetector
-from scaledp.models.detectors.SignatureDetector import SignatureDetector
 from scaledp.models.extractors.DSPyExtractor import DSPyExtractor
 from scaledp.models.extractors.LLMExtractor import LLMExtractor
 from scaledp.models.extractors.LLMVisualExtractor import LLMVisualExtractor
@@ -34,6 +34,7 @@ from scaledp.pdf.PdfAssembler import PdfAssembler
 from scaledp.pdf.PdfDataToDocument import PdfDataToDocument
 from scaledp.pdf.PdfDataToImage import PdfDataToImage
 from scaledp.pdf.PdfDataToSingleImage import PdfDataToSingleImage
+from scaledp.pdf.SingleImageToPdf import SingleImageToPdf
 from scaledp.text.TextToDocument import TextToDocument
 from scaledp.utils.show_utils import (
     show_image,
@@ -234,6 +235,7 @@ __all__ = [
     "PdfDataToSingleImage",
     "PdfAddTextLayer",
     "PdfAssembler",
+    "SingleImageToPdf",
     "__version__",
     "files",
     *dir(enums),

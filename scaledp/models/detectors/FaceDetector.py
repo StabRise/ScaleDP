@@ -1,7 +1,7 @@
 from types import MappingProxyType
 
-from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 from scaledp.enums import Device
+from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 
 
 class FaceDetector(YoloOnnxDetector):
@@ -21,6 +21,6 @@ class FaceDetector(YoloOnnxDetector):
             "propagateError": False,
             "task": "detect",
             "onlyRotated": False,
-            "model": "StabRise/face_detection"
+            "model": "StabRise/face_detection",
         },
     )

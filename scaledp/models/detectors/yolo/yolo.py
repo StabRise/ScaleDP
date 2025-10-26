@@ -132,9 +132,6 @@ class YOLO:
         self.img_height, self.img_width = image.shape[:2]
 
         input_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        print(input_img.shape)
-        print(self.input_shape)
-        print(f"Input width: {self.input_width}, Input height: {self.input_height}")
 
         # Rescale image with padding instead of simple resize
         input_img = self.rescale_image_with_padding(

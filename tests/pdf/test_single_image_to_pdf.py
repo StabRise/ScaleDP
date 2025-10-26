@@ -41,3 +41,23 @@ def test_image_to_pdf(image_df):
 
         # Write PDF data to temporary file
         temp.write(result[0].pdf.data)
+
+
+def test_image_to_pdf_show(image_df):
+    """
+    Test function to convert image DataFrame to PDF format.
+
+    Args:
+        image_df: DataFrame containing image data to be converted
+
+    Side Effects:
+        - Creates a temporary PDF file with the converted image
+        - Prints the local file path of the created PDF
+    """
+    # Initialize the PDF converter
+    image_to_pdf = SingleImageToPdf()
+
+    # Transform the image DataFrame to PDF format and cache for performance
+    result_df = image_to_pdf.transform(image_df).cache()
+
+    result_df.show_pdf(column="pdf", limit=1)

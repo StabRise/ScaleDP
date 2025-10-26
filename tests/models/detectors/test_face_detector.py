@@ -1,15 +1,12 @@
 import tempfile
 
 import pyspark
-from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
 from pyspark.ml import PipelineModel
 
-from scaledp import (
-    ImageDrawBoxes,
-    PdfDataToImage
-)
+from scaledp import ImageDrawBoxes, PdfDataToImage
 from scaledp.enums import Device
 from scaledp.models.detectors.FaceDetector import FaceDetector
+from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
 
 
 def test_face_detector(image_face_df):
@@ -17,10 +14,11 @@ def test_face_detector(image_face_df):
     detector = FaceDetector(
         device=Device.CPU,
         keepInputData=True,
-        partitionMap=False,
+        partitionMap=True,
         numPartitions=0,
         scoreThreshold=0.25,
         task="detect",
+        padding=20,
     )
 
     draw = ImageDrawBoxes(
@@ -35,7 +33,7 @@ def test_face_detector(image_face_df):
     pipeline = PipelineModel(stages=[detector, draw])
     result = pipeline.transform(image_face_df)
 
-    data = result.select('image_with_boxes').collect()
+    data = result.select("image_with_boxes", "boxes").collect()
 
     # Verify the pipeline result
     assert len(data) == 1, "Expected exactly one result"
@@ -54,7 +52,6 @@ def test_face_detector(image_face_df):
 
 def test_face_pdf_detector_pandas(face_pdf_file):
     pathSparkFunctions(pyspark)
-
 
     pdf = PdfDataToImage(
         inputCol="content",

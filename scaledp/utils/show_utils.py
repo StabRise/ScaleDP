@@ -184,6 +184,9 @@ def show_pdf(
     if column_type == "binary":
         df = PdfDataToImage(inputCol=column).transform(df)
         column = "image"
+    elif "struct" in column_type and "data" in column_type:
+        df = PdfDataToImage(inputCol="data").transform(df.select(f"{column}.data"))
+        column = "image"
     else:
         raise ValueError("Column must be binary")
     for id_, row in enumerate(df.limit(limit).select(column).collect()):

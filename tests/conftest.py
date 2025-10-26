@@ -125,10 +125,10 @@ def signatures_pdf_df(spark_session, resource_path_root):
 def signatures_pdf_file(spark_session, resource_path_root):
     return (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix()
 
+
 @pytest.fixture
 def face_pdf_file(spark_session, resource_path_root):
     return (resource_path_root / "pdfs" / "SampleWithFace.pdf").absolute().as_posix()
-
 
 
 @pytest.fixture
@@ -198,10 +198,13 @@ def image_signature_df(spark_session, resource_path_root):
 @pytest.fixture
 def image_face_df(spark_session, resource_path_root):
     df = spark_session.read.format("binaryFile").load(
-        (resource_path_root / "images" / "document_with_face.png").absolute().as_posix(),
+        (resource_path_root / "images" / "document_with_face.png")
+        .absolute()
+        .as_posix(),
     )
     bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
     return bin_to_image.transform(df)
+
 
 @pytest.fixture
 def receipt_json(receipt_json_path: Path) -> Path:

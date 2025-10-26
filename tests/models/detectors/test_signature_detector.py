@@ -1,7 +1,6 @@
 import tempfile
 
 import pyspark
-from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
 from pyspark.ml import PipelineModel
 
 from scaledp import (
@@ -10,6 +9,7 @@ from scaledp import (
     SignatureDetector,
 )
 from scaledp.enums import Device
+from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
 
 
 def test_signature_detector(image_signature_df):

@@ -80,7 +80,10 @@ class DataToImage(
     def _transform(self, dataset):
         out_col = self.getOutputCol()
         input_col = self._validate(self.getInputCol(), dataset)
-        path_col = self._validate(self.getPathCol(), dataset)
+        try:
+            path_col = self._validate(self.getPathCol(), dataset)
+        except Exception:
+            path_col = lit("memory")
         resolution = (
             dataset["resolution"] if "resolution" in dataset.columns else lit(0)
         )
