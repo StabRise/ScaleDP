@@ -57,6 +57,11 @@ To run pre-commit on all files:
 pre-commit run --all-files
 ```
 
+## Update changelogs
+
+```bash
+  poetry run git cliff --unreleased -o
+```
 
 ## Deps
 
