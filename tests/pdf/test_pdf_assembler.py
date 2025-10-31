@@ -1,10 +1,10 @@
 import tempfile
 
-from models.detectors.DBNetOnnxDetector import DBNetOnnxDetector
 from pyspark.ml import PipelineModel
 from pyspark.sql import DataFrame
 
 from scaledp import ImageDrawBoxes, TesseractRecognizer, TessLib
+from scaledp.models.detectors.DBNetOnnxDetector import DBNetOnnxDetector
 from scaledp.models.recognizers.TesseractOcr import TesseractOcr
 from scaledp.pdf import PdfAddTextLayer, PdfAssembler, PdfDataToImage, SingleImageToPdf
 from scaledp.pipeline.PandasPipeline import PandasPipeline
