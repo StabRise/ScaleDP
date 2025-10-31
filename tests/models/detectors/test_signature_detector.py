@@ -1,6 +1,5 @@
 import tempfile
 
-import pyspark
 from pyspark.ml import PipelineModel
 
 from scaledp import (
@@ -9,7 +8,7 @@ from scaledp import (
     SignatureDetector,
 )
 from scaledp.enums import Device
-from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
+from scaledp.pipeline.PandasPipeline import PandasPipeline
 
 
 def test_signature_detector(image_signature_df):
@@ -20,12 +19,11 @@ def test_signature_detector(image_signature_df):
         partitionMap=True,
         numPartitions=0,
         task="detect",
-        model="StabRise/signature_detection",
     )
 
     draw = ImageDrawBoxes(
         keepInputData=True,
-        inputCols=["image", "boxes"],
+        inputCols=["image", "signatures"],
         filled=False,
         color="green",
         lineWidth=5,
@@ -41,7 +39,7 @@ def test_signature_detector(image_signature_df):
     assert len(data) == 1, "Expected exactly one result"
 
     # # Check that exceptions is empty
-    assert data[0].boxes.exception == ""
+    assert data[0].signatures.exception == ""
 
     # Save the output image to a temporary file for verification
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
@@ -62,7 +60,6 @@ def test_signature_pdf_detector(signatures_pdf_df):
                 keepInputData=True,
                 outputCol="signatures",
                 scoreThreshold=0.20,
-                model="StabRise/signature_detection",
             ),
             ImageDrawBoxes(
                 keepInputData=True,
@@ -80,7 +77,7 @@ def test_signature_pdf_detector(signatures_pdf_df):
     assert len(data) == 1, "Expected exactly one result"
 
     # # Check that exceptions is empty
-    assert data[0].boxes.exception == ""
+    assert data[0].signatures.exception == ""
 
     # Save the output image to a temporary file for verification
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
@@ -91,11 +88,7 @@ def test_signature_pdf_detector(signatures_pdf_df):
         print("file://" + temp.name)
 
 
-def test_signature_pdf_detector_pandas(signatures_pdf_file):
-    pathSparkFunctions(pyspark)
-
-    # pdf = PdfDataToSingleImage(inputCol="content", outputCol="image",
-    #                            keepInputData=True)
+def test_signature_pdf_detector_pandas(signatures_pdf_file, patch_spark):
 
     pdf = PdfDataToImage(
         inputCol="content",
@@ -115,7 +108,7 @@ def test_signature_pdf_detector_pandas(signatures_pdf_file):
 
     draw = ImageDrawBoxes(
         keepInputData=True,
-        inputCols=["image", "boxes"],
+        inputCols=["image", "signatures"],
         filled=False,
         color="green",
         lineWidth=5,
