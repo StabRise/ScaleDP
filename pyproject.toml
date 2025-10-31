@@ -87,7 +87,6 @@ ultralytics = "^8.3.40"
 pre-commit = "^3.7.1"
 ruff = "^0.5.0"
 craft-text-detector-updated = "^0.4.7"
-paddleocr = "^3.3.1"
 
 
 [tool.poetry.group.dev.dependencies]

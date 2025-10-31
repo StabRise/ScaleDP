@@ -36,6 +36,9 @@ def layout_detector():
     )
 
 
+@pytest.skip(
+    reason="Requires PaddleOCR which may not be installed in all environments.",
+)
 def test_layout_detector_with_drawn_boxes(image_df):
     """Test LayoutDetector with drawn boxes on the original image."""
     detector = LayoutDetector(
@@ -92,6 +95,9 @@ def test_layout_detector_with_drawn_boxes(image_df):
         assert "Error in object detection" in str(e) or "PaddleOCR" in str(e)
 
 
+@pytest.skip(
+    reason="Requires PaddleOCR which may not be installed in all environments.",
+)
 def test_layout_detector_with_custom_layout_types():
     """Test LayoutDetector with custom layout types."""
     detector = LayoutDetector(
