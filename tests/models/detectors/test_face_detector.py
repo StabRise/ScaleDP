@@ -1,12 +1,11 @@
 import tempfile
 
-import pyspark
 from pyspark.ml import PipelineModel
 
 from scaledp import ImageDrawBoxes, PdfDataToImage
 from scaledp.enums import Device
 from scaledp.models.detectors.FaceDetector import FaceDetector
-from scaledp.pipeline.PandasPipeline import PandasPipeline, pathSparkFunctions
+from scaledp.pipeline.PandasPipeline import PandasPipeline
 
 
 def test_face_detector(image_face_df):
@@ -50,8 +49,7 @@ def test_face_detector(image_face_df):
         print("file://" + temp.name)
 
 
-def test_face_pdf_detector_pandas(face_pdf_file):
-    pathSparkFunctions(pyspark)
+def test_face_pdf_detector_pandas(face_pdf_file, patch_spark):
 
     pdf = PdfDataToImage(
         inputCol="content",

@@ -25,7 +25,7 @@ def image_file(resource_path_root):
 
 @pytest.fixture
 def image_rotated_text_file(resource_path_root):
-    return (resource_path_root / "images/RotatedText1.png").absolute().as_posix()
+    return (resource_path_root / "images/RotatedText.png").absolute().as_posix()
 
 
 @pytest.fixture
@@ -115,15 +115,17 @@ def image_pdf_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
-def signatures_pdf_df(spark_session, resource_path_root):
-    return spark_session.read.format("binaryFile").load(
-        (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix(),
+def signatures_pdf_file(resource_path_root):
+    return (
+        (resource_path_root / "pdfs" / "SampleWithSignatures.pdf").absolute().as_posix()
     )
 
 
 @pytest.fixture
-def signatures_pdf_file(spark_session, resource_path_root):
-    return (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix()
+def signatures_pdf_df(spark_session, signatures_pdf_file):
+    return spark_session.read.format("binaryFile").load(
+        signatures_pdf_file,
+    )
 
 
 @pytest.fixture
