@@ -6,7 +6,8 @@ from typing import Any
 from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import explode, udf
+from pyspark.sql.types import ArrayType
 
 from scaledp.params import (
     AutoParamsMeta,
@@ -65,6 +66,13 @@ class ImageCropBoxes(
         typeConverter=TypeConverters.toBoolean,
     )
 
+    limit = Param(
+        Params._dummy(),
+        "limit",
+        "Limit of boxes for crop.",
+        typeConverter=TypeConverters.toInt,
+    )
+
     defaultParams = MappingProxyType(
         {
             "inputCols": ["image", "boxes"],
@@ -76,6 +84,7 @@ class ImageCropBoxes(
             "pageCol": "page",
             "propagateError": False,
             "noCrop": True,
+            "limit": 0,
         },
     )
 
@@ -98,20 +107,36 @@ class ImageCropBoxes(
                 )
             img = image.to_pil()
             results = []
-            for b in data.bboxes:
+            limit = self.getLimit()
+
+            bboxes = data.bboxes[:limit] if limit > 0 else data.bboxes
+
+            for b in bboxes:
                 box = b
                 if not isinstance(box, Box):
                     box = Box(**box.asDict())
-                if box.width > box.height:
-                    results.append(
-                        img.crop(box.bbox(self.getPadding())).rotate(-90, expand=True),
+                if box.width < box.height:
+                    cropped_image = img.crop(box.bbox(self.getPadding())).rotate(
+                        -90,
+                        expand=True,
                     )
                 else:
-                    results.append(img.crop(box.bbox(self.getPadding())))
+                    cropped_image = img.crop(box.bbox(self.getPadding()))
+                results.append(
+                    Image.from_pil(
+                        cropped_image,
+                        image.path,
+                        image.imageType,
+                        image.resolution,
+                    ),
+                )
+
             if self.getNoCrop() and len(results) == 0:
                 raise ImageCropError("No boxes to crop")
             if len(results) == 0:
-                results.append(img)
+                results.append(
+                    Image.from_pil(img, image.path, image.imageType, image.resolution),
+                )
 
         except Exception as e:
             exception = traceback.format_exc()
@@ -120,7 +145,7 @@ class ImageCropBoxes(
             if self.getPropagateError():
                 raise ImageCropError from e
             return Image(image.path, image.imageType, data=bytes(), exception=exception)
-        return Image.from_pil(results[0], image.path, image.imageType, image.resolution)
+        return results
 
     def _transform(self, dataset):
         out_col = self.getOutputCol()
@@ -133,7 +158,12 @@ class ImageCropBoxes(
             )
         result = dataset.withColumn(
             out_col,
-            udf(self.transform_udf, Image.get_schema())(image_col, box_col),
+            explode(
+                udf(self.transform_udf, ArrayType(Image.get_schema()))(
+                    image_col,
+                    box_col,
+                ),
+            ),
         )
 
         if not self.getKeepInputData():
