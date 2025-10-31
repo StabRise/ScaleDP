@@ -525,6 +525,14 @@ class HasColumnValidator:
         Validate input schema.
         """
         if column_name not in dataset.columns:
+            if len(column_name.split(".")) > 1:
+                root_col = column_name.split(".")[0]
+                if root_col not in dataset.columns:
+                    raise ValueError(
+                        f"Missing input column in transformer {self.uid}: "
+                        f"Column '{root_col}' is not present.",
+                    )
+                return dataset[column_name]
             raise ValueError(
                 f"Missing input column in transformer {self.uid}: "
                 f"Column '{column_name}' is not present.",

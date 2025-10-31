@@ -4,11 +4,11 @@ from scaledp.enums import Device
 from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 
 
-class SignatureDetector(YoloOnnxDetector):
+class FaceDetector(YoloOnnxDetector):
     defaultParams = MappingProxyType(
         {
             "inputCol": "image",
-            "outputCol": "signatures",
+            "outputCol": "boxes",
             "keepInputData": False,
             "scaleFactor": 1.0,
             "scoreThreshold": 0.2,
@@ -21,6 +21,6 @@ class SignatureDetector(YoloOnnxDetector):
             "propagateError": False,
             "task": "detect",
             "onlyRotated": False,
-            "model": "StabRise/signature_detection",
+            "model": "StabRise/face_detection",
         },
     )

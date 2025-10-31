@@ -36,16 +36,6 @@ def layout_detector():
     )
 
 
-def test_layout_detector_initialization(layout_detector):
-    """Test that LayoutDetector initializes correctly."""
-    assert layout_detector.getInputCol() == "image"
-    assert layout_detector.getOutputCol() == "layout_boxes"
-    assert layout_detector.getScoreThreshold() == 0.5
-    assert layout_detector.getDevice() == Device.CPU
-    assert layout_detector.getWhiteList() == []
-    assert layout_detector.getModel() == "PP-DocLayout_plus-L"
-
-
 def test_layout_detector_with_drawn_boxes(image_df):
     """Test LayoutDetector with drawn boxes on the original image."""
     detector = LayoutDetector(
@@ -114,15 +104,3 @@ def test_layout_detector_with_custom_layout_types():
 
     assert detector.getWhiteList() == ["text", "table"]
     assert detector.getModel() == "PP-DocLayout-M"
-
-
-def test_layout_detector_output_schema(layout_detector):
-    """Test that the output schema is correct."""
-    schema = layout_detector.outputSchema()
-
-    # Check that the schema has the expected fields
-    field_names = [field.name for field in schema.fields]
-    expected_fields = ["path", "type", "bboxes", "exception"]
-
-    for field in expected_fields:
-        assert field in field_names

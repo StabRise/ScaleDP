@@ -27,6 +27,14 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
         typeConverter=TypeConverters.toString,
     )
 
+    # Add padding param: integer percent to expand detected boxes
+    padding = Param(
+        Params._dummy(),
+        "padding",
+        "Padding percent to expand detected boxes (integer).",
+        typeConverter=TypeConverters.toInt,
+    )
+
     defaultParams = MappingProxyType(
         {
             "inputCol": "image",
@@ -43,6 +51,7 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
             "propagateError": False,
             "task": "detect",
             "onlyRotated": False,
+            "padding": 0,  # default padding percent
         },
     )
 
@@ -88,9 +97,30 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
             # Convert PIL to NumPy (RGB)
             image_np = np.array(image)
             raw_boxes, scores, class_ids = detector.detect_objects(image_np)
-
+            # Expand boxes by padding percent if provided
+            pad_percent = int(params.get("padding", 0)) if params is not None else 0
+            h_img, w_img = image_np.shape[:2]
             for box in raw_boxes:
-                boxes.append(Box.from_bbox(box))
+                # Assume box format is [x1, y1, x2, y2]
+                if pad_percent and len(box) >= 4:
+                    x1, y1, x2, y2 = (
+                        float(box[0]),
+                        float(box[1]),
+                        float(box[2]),
+                        float(box[3]),
+                    )
+                    w = x2 - x1
+                    h = y2 - y1
+                    dx = (pad_percent / 100.0) * w
+                    dy = (pad_percent / 100.0) * h
+                    x1_new = max(0.0, x1 - dx)
+                    y1_new = max(0.0, y1 - dy)
+                    x2_new = min(float(w_img - 1), x2 + dx)
+                    y2_new = min(float(h_img - 1), y2 + dy)
+                    expanded_box = [x1_new, y1_new, x2_new, y2_new]
+                else:
+                    expanded_box = box
+                boxes.append(Box.from_bbox(expanded_box))
             results_final.append(
                 DetectorOutput(path=image_path, type="yolo", bboxes=boxes),
             )

@@ -8,7 +8,7 @@ from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 from pyspark.pandas import DataFrame
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import lit, udf
 from pyspark.sql.types import ArrayType, Row
 
 from scaledp.enums import ImageType
@@ -110,7 +110,10 @@ class PdfDataToImage(
     def _transform(self, dataset: DataFrame) -> DataFrame:
         out_col = self.getOutputCol()
         input_col = self._validate(self.getInputCol(), dataset)
-        path_col = dataset[self.getPathCol()]
+        try:
+            path_col = self._validate(self.getPathCol(), dataset)
+        except Exception:
+            path_col = lit("memory")
 
         df_1 = dataset.withColumn(
             "temp_data",

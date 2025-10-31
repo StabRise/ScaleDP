@@ -2,44 +2,43 @@ import tempfile
 
 from pyspark.ml import PipelineModel
 
-from scaledp import (
-    ImageDrawBoxes,
-    PdfDataToImage,
-    SignatureDetector,
-)
+from scaledp import ImageDrawBoxes, PdfDataToImage
 from scaledp.enums import Device
+from scaledp.models.detectors.FaceDetector import FaceDetector
 from scaledp.pipeline.PandasPipeline import PandasPipeline
 
 
-def test_signature_detector(image_signature_df):
+def test_face_detector(image_face_df):
 
-    detector = SignatureDetector(
+    detector = FaceDetector(
         device=Device.CPU,
         keepInputData=True,
         partitionMap=True,
         numPartitions=0,
+        scoreThreshold=0.25,
         task="detect",
+        padding=20,
     )
 
     draw = ImageDrawBoxes(
         keepInputData=True,
-        inputCols=["image", "signatures"],
+        inputCols=["image", "boxes"],
         filled=False,
         color="green",
         lineWidth=5,
-        displayDataList=["score", "angle"],
+        displayDataList=[],
     )
     # Transform the image dataframe through the OCR stage
     pipeline = PipelineModel(stages=[detector, draw])
-    result = pipeline.transform(image_signature_df)
+    result = pipeline.transform(image_face_df)
 
-    data = result.collect()
+    data = result.select("image_with_boxes", "boxes").collect()
 
     # Verify the pipeline result
     assert len(data) == 1, "Expected exactly one result"
 
     # # Check that exceptions is empty
-    assert data[0].signatures.exception == ""
+    assert data[0].boxes.exception == ""
 
     # Save the output image to a temporary file for verification
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
@@ -50,45 +49,7 @@ def test_signature_detector(image_signature_df):
         print("file://" + temp.name)
 
 
-def test_signature_pdf_detector(signatures_pdf_df):
-
-    pipeline = PipelineModel(
-        stages=[
-            PdfDataToImage(outputCol="image"),
-            SignatureDetector(
-                device=Device.CPU,
-                keepInputData=True,
-                outputCol="signatures",
-                scoreThreshold=0.20,
-            ),
-            ImageDrawBoxes(
-                keepInputData=True,
-                inputCols=["image", "signatures"],
-                filled=True,
-                color="black",
-            ),
-        ],
-    )
-    result = pipeline.transform(signatures_pdf_df)
-
-    data = result.collect()
-
-    # Verify the pipeline result
-    assert len(data) == 1, "Expected exactly one result"
-
-    # # Check that exceptions is empty
-    assert data[0].signatures.exception == ""
-
-    # Save the output image to a temporary file for verification
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp:
-        temp.write(data[0].image_with_boxes.data)
-        temp.close()
-
-        # Print the path to the temporary file
-        print("file://" + temp.name)
-
-
-def test_signature_pdf_detector_pandas(signatures_pdf_file, patch_spark):
+def test_face_pdf_detector_pandas(face_pdf_file, patch_spark):
 
     pdf = PdfDataToImage(
         inputCol="content",
@@ -96,19 +57,18 @@ def test_signature_pdf_detector_pandas(signatures_pdf_file, patch_spark):
         pageLimit=1,
     )
 
-    detector = SignatureDetector(
+    detector = FaceDetector(
         device=Device.CPU,
         keepInputData=True,
         partitionMap=False,
         numPartitions=0,
         scoreThreshold=0.25,
         task="detect",
-        model="StabRise/signature_detection",
     )
 
     draw = ImageDrawBoxes(
         keepInputData=True,
-        inputCols=["image", "signatures"],
+        inputCols=["image", "boxes"],
         filled=False,
         color="green",
         lineWidth=5,
@@ -116,7 +76,7 @@ def test_signature_pdf_detector_pandas(signatures_pdf_file, patch_spark):
     )
     # Transform the image dataframe through the OCR stage
     pipeline = PandasPipeline(stages=[pdf, detector, draw])
-    data = pipeline.fromFile(signatures_pdf_file)
+    data = pipeline.fromFile(face_pdf_file)
 
     # Verify the pipeline result
     assert len(data) == 1, "Expected exactly one result"

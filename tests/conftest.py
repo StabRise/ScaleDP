@@ -25,7 +25,7 @@ def image_file(resource_path_root):
 
 @pytest.fixture
 def image_rotated_text_file(resource_path_root):
-    return (resource_path_root / "images/RotatedText1.png").absolute().as_posix()
+    return (resource_path_root / "images/RotatedText.png").absolute().as_posix()
 
 
 @pytest.fixture
@@ -115,15 +115,22 @@ def image_pdf_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
-def signatures_pdf_df(spark_session, resource_path_root):
-    return spark_session.read.format("binaryFile").load(
-        (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix(),
+def signatures_pdf_file(resource_path_root):
+    return (
+        (resource_path_root / "pdfs" / "SampleWithSignatures.pdf").absolute().as_posix()
     )
 
 
 @pytest.fixture
-def signatures_pdf_file(spark_session, resource_path_root):
-    return (resource_path_root / "pdfs" / "signatures.pdf").absolute().as_posix()
+def signatures_pdf_df(spark_session, signatures_pdf_file):
+    return spark_session.read.format("binaryFile").load(
+        signatures_pdf_file,
+    )
+
+
+@pytest.fixture
+def face_pdf_file(spark_session, resource_path_root):
+    return (resource_path_root / "pdfs" / "SampleWithFace.pdf").absolute().as_posix()
 
 
 @pytest.fixture
@@ -185,6 +192,17 @@ def image_qr_code_df(spark_session, resource_path_root):
 def image_signature_df(spark_session, resource_path_root):
     df = spark_session.read.format("binaryFile").load(
         (resource_path_root / "images" / "signature.png").absolute().as_posix(),
+    )
+    bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
+    return bin_to_image.transform(df)
+
+
+@pytest.fixture
+def image_face_df(spark_session, resource_path_root):
+    df = spark_session.read.format("binaryFile").load(
+        (resource_path_root / "images" / "document_with_face.png")
+        .absolute()
+        .as_posix(),
     )
     bin_to_image = DataToImage().setImageType(ImageType.WEBP.value)
     return bin_to_image.transform(df)
