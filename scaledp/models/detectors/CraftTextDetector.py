@@ -12,6 +12,8 @@ from scaledp.schemas.DetectorOutput import DetectorOutput
 
 
 class CraftTextDetector(BaseDetector, HasDevice, HasBatchSize):
+    """CRAFT text detector."""
+
     _craft_net = None
     _refine_net = None
 

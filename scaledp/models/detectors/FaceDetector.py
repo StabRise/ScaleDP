@@ -5,6 +5,8 @@ from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
 
 
 class FaceDetector(YoloOnnxDetector):
+    """Face detector using YOLO ONNX model."""
+
     defaultParams = MappingProxyType(
         {
             "inputCol": "image",

@@ -59,6 +59,7 @@ class ImageCropBoxes(
         "Padding.",
         typeConverter=TypeConverters.toInt,
     )
+
     noCrop = Param(
         Params._dummy(),
         "noCrop",
@@ -73,6 +74,13 @@ class ImageCropBoxes(
         typeConverter=TypeConverters.toInt,
     )
 
+    autoRotate = Param(
+        Params._dummy(),
+        "autoRotate",
+        "Auto rotate cropped image if box height > box width.",
+        typeConverter=TypeConverters.toBoolean,
+    )
+
     defaultParams = MappingProxyType(
         {
             "inputCols": ["image", "boxes"],
@@ -85,6 +93,7 @@ class ImageCropBoxes(
             "propagateError": False,
             "noCrop": True,
             "limit": 0,
+            "autoRotate": True,
         },
     )
 
@@ -115,7 +124,7 @@ class ImageCropBoxes(
                 box = b
                 if not isinstance(box, Box):
                     box = Box(**box.asDict())
-                if box.width < box.height:
+                if self.getAutoRotate() and box.width < box.height:
                     cropped_image = img.crop(box.bbox(self.getPadding())).rotate(
                         -90,
                         expand=True,

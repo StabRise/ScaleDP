@@ -42,4 +42,11 @@ Benefits of using ScaleDP
 
    installation.md
    quickstart.md
+   image_processing.md
+   pdf_processing.md
+   detectors.md
+   ocr.md
+   show_utils.md
+   release_notes.md
+
 

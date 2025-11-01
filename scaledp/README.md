@@ -30,7 +30,9 @@
 ### Build documentation
 
 ```bash
+  pip install sphinx_book_theme myst_parser
   poetry run sphinx-build -M html source build
+  poetry run sphinx-apidoc -o source/ ../scaledp
 ```
 
 ### Release

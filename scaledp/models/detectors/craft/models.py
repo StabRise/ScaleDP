@@ -4,7 +4,6 @@ from crafter.resources import res
 
 class Craftnet:
     def __init__(self, onnx_path=None):
-        onnx_path = "/home/mykola/PycharmProjects/scaledp/tests/model.quant.onnx"
 
         session_options = onnxruntime.SessionOptions()
         if onnx_path is None:
