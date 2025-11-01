@@ -1,8 +1,8 @@
-## 0.2.4 - 01.10.2025
+## 0.2.4 - 02.11.2025
 
 ### 🚀 Features
 
-- Added [FaceDetector](https://scaledp.stabrise.com/en/latest/image/face_detector.html) transformer
+- Added [FaceDetector](https://scaledp.stabrise.com/en/latest/models/detectors/face_detector.html) transformer
 - Added [SignatureDetector](https://scaledp.stabrise.com/en/latest/models/detectors/signature_detector.html) transformers
 - Added [PdfAssembler](https://scaledp.stabrise.com/en/latest/pdf/pdf_assembler.html) transformer for assembling PDFs
 - Updated [ImageCropBoxes](https://scaledp.stabrise.com/en/latest/image/image_crop_boxes.html) to support multiple boxes
