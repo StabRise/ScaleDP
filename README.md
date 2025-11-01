@@ -15,15 +15,35 @@
     <a href="https://stabrise.com"><img alt="StabRise" src="https://img.shields.io/badge/powered%20by-StabRise-orange.svg?style=flat&colorA=E1523D&colorB=007D8A"></a>
     <a href="https://app.codacy.com/gh/StabRise/ScaleDP/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade">
     <img src="https://app.codacy.com/project/badge/Grade/98570508281140c2a33e616a4f749c20" alt="Codacy Badge" />
-</a></p>
+</a>    
+<a href="https://github.com/pre-commit/pre-commit">
+       <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit">
+    </a>
+    <a href="https://python-poetry.org/">
+      <img src="https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json" alt="Poetry"/>
+    </a>
+    <a href="https://github.com/psf/black">
+      <img src="https://img.shields.io/badge/code%20style-black-000000.svg" 
+alt="Code style: black"/>
+    </a>
+    <a href="https://scaledp.stabrise.com/en/latest/">
+       <img src="https://app.readthedocs.org/projects/scaledp/badge/?version=latest" alt="Documentation Status"/>
+    </a>
+</p>
 
+   
 ---
+
 
 **Source Code**: <a href="https://github.com/StabRise/ScaleDP/" target="_blank">https://github.com/StabRise/ScaleDP</a>
 
 **Quickstart**: <a href="https://colab.research.google.com/github/StabRise/scaledp-tutorials/blob/master/1.QuickStart.ipynb" target="_blank">1.QuickStart.ipynb</a>
 
+**Documentations**: <a href="https://scaledp.stabrise.com/en/latest/" target="_blank">https://scaledp.stabrise.com</a>
+
 **Tutorials**: <a href="https://github.com/StabRise/ScaleDP-Tutorials/" target="_blank">https://github.com/StabRise/ScaleDP-Tutorials</a>
+
+[**Change Log**](CHANGELOG.md)
 
 ---
 
@@ -319,13 +339,13 @@ result.show_image("image_with_boxes")
 | [DocTR](https://github.com/mindee/doctr)       | word        | yes         | yes                                |                                       |                          |
 
 
-## Projects based on the ScaleDP
+## Projects used the ScaleDP
 
  - [PDF Redaction](https://pdf-redaction.com/) - Free AI-powered tool for redact PDF files (remove sensitive information) online.
-
-
-<a href="https://pdf-redaction.com/"><img alt="pdf-redaction" src="https://media.licdn.com/dms/image/v2/D4D22AQGhRpexOnAbyA/feedshare-shrink_800/B4DZVmbKWPHIAg-/0/1741180153002?e=1744243200&v=beta&t=lRQXyJ5nHYvdU4uF6LJuq69oKs72yPBs1xts2IrJgxc"/></a>
-
+ - [frontiersin.org](https://frontiersin.org/) - Reviewer Recommendation System for academic articles using ScaleDP and LLM models.
+ - [dayme.tech](https://dayme.tech/) - Data extraction from scanned receipts using ScaleDP and LLM models.
+ - [curie.is](https://curie.is/) - Curie used ScaleDP for document 
+   preprocessing and analysis data in documents.
 
 ## Disclaimer
 
