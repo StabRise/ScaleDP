@@ -162,3 +162,4 @@ cython_debug/
 .idea/
 /.vscode/settings.json
 /tests/testresources/pdfs/private/
+/.run/*

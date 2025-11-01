@@ -18,6 +18,8 @@ from scaledp.schemas.DetectorOutput import DetectorOutput
 
 
 class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
+    """YOLO ONNX object detector."""
+
     _model: ClassVar = {}
 
     task = Param(
