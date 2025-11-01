@@ -75,6 +75,7 @@ class BaseDetector(
         return json.dumps({k.name: v for k, v in self.extractParamMap().items()})
 
     def outputSchema(self):
+        """Output schema of the detector."""
         return StructType(
             [
                 StructField("path", StringType(), True),
@@ -92,6 +93,9 @@ class BaseDetector(
         )
 
     def transform_udf(self, image, params=None):
+        """
+        Run detector on a single image.
+        """
         logging.info("Run Detector")
         if params is None:
             params = self.get_params()
@@ -147,6 +151,9 @@ class BaseDetector(
         images: pd.DataFrame,
         params: pd.Series,
     ) -> pd.DataFrame:
+        """
+        Run detector on a batch of images.
+        """
         params = json.loads(params[0])
         resized_images = []
         for _index, img in images.iterrows():

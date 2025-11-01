@@ -17,6 +17,8 @@ from scaledp.schemas.DetectorOutput import DetectorOutput
 
 
 class YoloOnnxTextDetector(BaseDetector, HasDevice, HasBatchSize):
+    """YOLO ONNX text detector."""
+
     _model = None
 
     task = Param(

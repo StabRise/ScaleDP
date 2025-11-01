@@ -65,7 +65,7 @@ class PdfDataToSingleImage(DataToImage, HasResolution):
         except Exception:
             return Image(
                 path,
-                exception="Error in extration of image from pdf document",
+                exception="Error in extraction of image from pdf document",
             )
 
     def getPageNumber(self):
