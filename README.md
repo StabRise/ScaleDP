@@ -14,21 +14,12 @@
     <a href="https://github.com/stabrise/spark-pdf/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/stabrise/spark-pdf.svg?color=blue"></a>
     <a href="https://stabrise.com"><img alt="StabRise" src="https://img.shields.io/badge/powered%20by-StabRise-orange.svg?style=flat&colorA=E1523D&colorB=007D8A"></a>
     <a href="https://app.codacy.com/gh/StabRise/ScaleDP/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade">
-    <img src="https://app.codacy.com/project/badge/Grade/98570508281140c2a33e616a4f749c20" alt="Codacy Badge" />
-</a>    
-<a href="https://github.com/pre-commit/pre-commit">
-       <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit">
-    </a>
-    <a href="https://python-poetry.org/">
-      <img src="https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json" alt="Poetry"/>
-    </a>
-    <a href="https://github.com/psf/black">
-      <img src="https://img.shields.io/badge/code%20style-black-000000.svg" 
-alt="Code style: black"/>
-    </a>
-    <a href="https://scaledp.stabrise.com/en/latest/">
-       <img src="https://app.readthedocs.org/projects/scaledp/badge/?version=latest" alt="Documentation Status"/>
-    </a>
+      <img src="https://app.codacy.com/project/badge/Grade/98570508281140c2a33e616a4f749c20" alt="Codacy Badge" /></a>    
+    <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.
+shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit"></a>
+    <a href="https://python-poetry.org/"><img src="https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json" alt="Poetry"/></a>
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"alt="Code style: black"/></a>
+    <a href="https://scaledp.stabrise.com/en/latest/"><img src="https://app.readthedocs.org/projects/scaledp/badge/?version=latest" alt="Documentation Status"/></a>
 </p>
 
    
