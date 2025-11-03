@@ -163,3 +163,5 @@ cython_debug/
 /.vscode/settings.json
 /tests/testresources/pdfs/private/
 /.run/*
+/tests/testresources/private/
+/tests/models/detectors/test_signature_detector_private.py
