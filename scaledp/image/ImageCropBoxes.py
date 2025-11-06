@@ -81,6 +81,13 @@ class ImageCropBoxes(
         typeConverter=TypeConverters.toBoolean,
     )
 
+    returnEmpty = Param(
+        Params._dummy(),
+        "returnEmpty",
+        "Return Empty list of images in case no boxes.",
+        typeConverter=TypeConverters.toBoolean,
+    )
+
     defaultParams = MappingProxyType(
         {
             "inputCols": ["image", "boxes"],
@@ -94,6 +101,7 @@ class ImageCropBoxes(
             "noCrop": True,
             "limit": 0,
             "autoRotate": True,
+            "returnEmpty": False,
         },
     )
 
@@ -142,7 +150,7 @@ class ImageCropBoxes(
 
             if self.getNoCrop() and len(results) == 0:
                 raise ImageCropError("No boxes to crop")
-            if len(results) == 0:
+            if not self.getReturnEmpty() and len(results) == 0:
                 results.append(
                     Image.from_pil(img, image.path, image.imageType, image.resolution),
                 )
@@ -153,7 +161,9 @@ class ImageCropBoxes(
             logging.warning(exception)
             if self.getPropagateError():
                 raise ImageCropError from e
-            return Image(image.path, image.imageType, data=bytes(), exception=exception)
+            return [
+                Image(image.path, image.imageType, data=bytes(), exception=exception),
+            ]
         return results
 
     def _transform(self, dataset):

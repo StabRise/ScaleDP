@@ -71,7 +71,9 @@ class YOLO:
         new_height = int(self.original_height * self.scale_factor)
 
         # Resize image
-        resized_image = cv2.resize(image, (new_width, new_height))
+        resized_image = cv2.resize(
+            image, (new_width, new_height), interpolation=cv2.INTER_LINEAR
+        )
 
         # Calculate padding to center the image
         self.pad_x = (target_width - new_width) // 2
@@ -129,19 +131,16 @@ class YOLO:
 
     def prepare_input(self, image):
         # Store original dimensions for coordinate restoration
-        self.img_height, self.img_width = image.shape[:2]
-
-        input_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Rescale image with padding instead of simple resize
         input_img = self.rescale_image_with_padding(
-            input_img, (self.input_width, self.input_height)
+            image, (self.input_width, self.input_height)
         )
 
         # Scale input pixel values to 0 to 1
         input_img = input_img / 255.0
         input_img = input_img.transpose(2, 0, 1)
-        return input_img[np.newaxis, :, :, :].astype(np.float32)
+        return np.expand_dims(input_img, 0).astype(np.float32)
 
     def inference(self, input_tensor):
         return self.session.run(self.output_names, {self.input_names[0]: input_tensor})

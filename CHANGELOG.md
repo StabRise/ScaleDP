@@ -1,4 +1,15 @@
-## 0.2.4 - 02.11.2025
+## [unreleased]
+
+### 🚀 Features
+
+- Added param 'returnEmpty' to [ImageCropBoxes](https://scaledp.stabrise.com/en/latest/image/image_crop_boxes.html) for avoid to have exceptions if no boxes are found
+
+### 🐛 Bug Fixes
+
+- Fixed convert color schema in [YoloOnnxDetector](https://scaledp.stabrise.com/en/latest/models/detectors/yolo_onnx_detector.html)
+
+
+## [0.2.4]- 02.11.2025
 
 ### 🚀 Features
 

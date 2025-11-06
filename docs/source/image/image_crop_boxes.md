@@ -11,7 +11,7 @@
 from scaledp import FaceDetector, ImageCropBoxes, PipelineModel
 
 # Step 1: Detect faces in images
-detector = FaceDetector(
+face_detector = FaceDetector(
     inputCol="image",
     outputCol="boxes",
     keepInputData=True,
@@ -28,10 +28,11 @@ cropper = ImageCropBoxes(
     limit=5,
     noCrop=True,
     autoRotate=False,  # Automatically rotate crops if box height > width
+    returnEmpty=True,  # Return empty list if no boxes found
 )
 
 # Build and run the pipeline
-pipeline = PipelineModel(stages=[detector, cropper])
+pipeline = PipelineModel(stages=[face_detector, cropper])
 result = pipeline.transform(image_df)
 result.show_image("cropped_image")
 ```
@@ -53,11 +54,13 @@ result.show_image("cropped_image")
 | noCrop            | bool    | Raise error if no boxes to crop                  | True            |
 | limit             | int     | Limit number of crops per image                  | 0 (no limit)    |
 | autoRotate        | bool    | Auto rotate crop if box height > width           | True            |
+| returnEmpty       | bool    | Return empty list if no boxes found              | False           |
 
 ## Notes
-- Crops are performed using bounding boxes from the `boxes` column.
-- If `noCrop` is True and no boxes are present, an error is raised.
+- Crops are performed using bounding boxes from the `boxes` column (e.g., output of [FaceDetector](https://scaledp.stabrise.com/en/latest/models/detectors/face_detector.html)).
+- If `noCrop` is True and no boxes are present, an error is raised unless `returnEmpty` is True.
 - If `limit` is set, only the first N boxes are used for cropping.
 - If `autoRotate` is True, crops are rotated if the bounding box height is greater than its width.
+- If `returnEmpty` is True, returns an empty list of images if no boxes are found (prevents exceptions).
 - Supports distributed processing with Spark.
 - Errors can be propagated or handled gracefully based on `propagateError`.

@@ -97,7 +97,7 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
         for image, image_path in images:
             boxes = []
             # Convert PIL to NumPy (RGB)
-            image_np = np.array(image)
+            image_np = np.array(image.convert("RGB"))
             raw_boxes, scores, class_ids = detector.detect_objects(image_np)
             # Expand boxes by padding percent if provided
             pad_percent = int(params.get("padding", 0)) if params is not None else 0
