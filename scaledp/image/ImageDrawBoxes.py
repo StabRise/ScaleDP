@@ -179,13 +179,33 @@ class ImageDrawBoxes(
             self.draw_box(box, color, fill, img1)
             text = self.getDisplayText(box)
             if text:
+                tbox = list(
+                    img1.textbbox(
+                        (
+                            box.x,
+                            box.y - self.getTextSize() * 1.2 - self.getPadding(),
+                        ),
+                        text,
+                        font_size=self.getTextSize(),
+                    ),
+                )
+                tbox[3] = tbox[3] + self.getTextSize() / 4
+                tbox[2] = tbox[2] + self.getTextSize() / 4
+                tbox[0] = box.x - self.getPadding()
+                tbox[1] = box.y - self.getTextSize() * 1.2 - self.getPadding()
+                img1.rounded_rectangle(
+                    tbox,
+                    outline=color,
+                    radius=2,
+                    fill=color,
+                )
                 img1.text(
                     (
                         box.x,
                         box.y - self.getTextSize() * 1.2 - self.getPadding(),
                     ),
                     text,
-                    fill=color,
+                    fill="white",
                     font_size=self.getTextSize(),
                 )
 
