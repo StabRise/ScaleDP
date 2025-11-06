@@ -24,5 +24,6 @@ class FaceDetector(YoloOnnxDetector):
             "task": "detect",
             "onlyRotated": False,
             "model": "StabRise/face_detection",
+            "labels": ["face"],
         },
     )

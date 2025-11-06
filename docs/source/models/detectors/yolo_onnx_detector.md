@@ -47,11 +47,12 @@ detected_df = detector.transform(input_df)
 | onlyRotated       | bool    | Return only rotated boxes                        | False                       |
 | model             | str     | Model identifier                                 | (required)                  |
 | padding           | int     | Padding percent to expand detected boxes         | 0                           |
+| labels            | list    | List of class labels for detected objects        | []                          |
 
 ## Notes
 - The detector loads YOLO ONNX models from Hugging Face Hub or local path.
 - Supports batch and distributed processing with Spark.
 - Padding expands detected bounding boxes by a percentage.
+- The `labels` parameter allows you to specify custom class labels for the detected objects. If provided, detection results will use these labels instead of class indices.
 - Used as a base for specialized detectors (e.g., [**Face Detector**]
   (#FaceDetector), [**Signature Detector**](#SignatureDetector)).
-

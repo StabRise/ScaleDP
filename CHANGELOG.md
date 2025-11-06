@@ -3,6 +3,8 @@
 ### 🚀 Features
 
 - Added param 'returnEmpty' to [ImageCropBoxes](https://scaledp.stabrise.com/en/latest/image/image_crop_boxes.html) for avoid to have exceptions if no boxes are found
+- Added labels param to the [YoloOnnxDetector](https://scaledp.stabrise.com/en/latest/models/detectors/yolo_onnx_detector.html)
+- Improve displaying labels in [ImageDrawBoxes](https://scaledp.stabrise.com/en/latest/image/image_draw_boxes.html)
 
 ### 🐛 Bug Fixes
 

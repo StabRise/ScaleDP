@@ -12,12 +12,12 @@ from pyspark.ml.param import Param, Params, TypeConverters
 from scaledp.enums import Device
 from scaledp.models.detectors.BaseDetector import BaseDetector
 from scaledp.models.detectors.yolo.yolo import YOLO
-from scaledp.params import HasBatchSize, HasDevice
+from scaledp.params import HasBatchSize, HasDevice, HasLabels
 from scaledp.schemas.Box import Box
 from scaledp.schemas.DetectorOutput import DetectorOutput
 
 
-class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
+class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize, HasLabels):
     """YOLO ONNX object detector."""
 
     _model: ClassVar = {}
@@ -54,6 +54,7 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
             "task": "detect",
             "onlyRotated": False,
             "padding": 0,  # default padding percent
+            "labels": [],  # default empty labels
         },
     )
 
@@ -82,7 +83,7 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
 
         logging.info("Model downloaded")
 
-        detector = YOLO(model_path_final, params["scoreThreshold"])
+        detector = YOLO(model_path_final, conf_thres=params["scoreThreshold"])
 
         cls._model[model_path] = detector
         return cls._model[model_path]
@@ -102,7 +103,8 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
             # Expand boxes by padding percent if provided
             pad_percent = int(params.get("padding", 0)) if params is not None else 0
             h_img, w_img = image_np.shape[:2]
-            for box in raw_boxes:
+            labels = params.get("labels", [])
+            for i, box in enumerate(raw_boxes):
                 # Assume box format is [x1, y1, x2, y2]
                 if pad_percent and len(box) >= 4:
                     x1, y1, x2, y2 = (
@@ -122,7 +124,14 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize):
                     expanded_box = [x1_new, y1_new, x2_new, y2_new]
                 else:
                     expanded_box = box
-                boxes.append(Box.from_bbox(expanded_box))
+                # Map class_id to label and get score
+                label = (
+                    labels[class_ids[i]]
+                    if labels and class_ids[i] < len(labels)
+                    else str(class_ids[i])
+                )
+                score = scores[i] if scores is not None and i < len(scores) else 0.0
+                boxes.append(Box.from_bbox(expanded_box, label=label, score=score))
             results_final.append(
                 DetectorOutput(path=image_path, type="yolo", bboxes=boxes),
             )
