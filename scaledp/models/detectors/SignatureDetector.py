@@ -22,5 +22,6 @@ class SignatureDetector(YoloOnnxDetector):
             "task": "detect",
             "onlyRotated": False,
             "model": "StabRise/signature_detection",
+            "labels": ["signature"],
         },
     )

@@ -827,3 +827,31 @@ class HasPropagateExc(Params):
     def setPropagateError(self, value: bool) -> Any:
         """Sets the value of :py:attr:`propagateError`."""
         return self._set(propagateError=value)
+
+
+class HasLabels(Params):
+    """
+    Mixin for param labels: list of class labels.
+    """
+
+    labels: "Param[list[str]]" = Param(
+        Params._dummy(),
+        "labels",
+        "List of the labels.",
+        typeConverter=TypeConverters.toListString,
+    )
+
+    def __init__(self) -> None:
+        super(HasLabels, self).__init__()
+
+    def getLabels(self) -> list[str]:
+        """
+        Gets the value of labels or its default value.
+        """
+        return self.getOrDefault(self.labels)
+
+    def setLabels(self, value: list[str]) -> Any:
+        """
+        Sets the value of :py:attr:`labels`.
+        """
+        return self._set(labels=value)
