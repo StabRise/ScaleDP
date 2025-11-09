@@ -1,6 +1,6 @@
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-from pyspark.pandas import DataFrame
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import input_file_name, udf
 
 from scaledp.params import HasInputCol, HasOutputCol

@@ -7,7 +7,6 @@ import fitz
 from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-from pyspark.pandas import DataFrame
 from pyspark.sql.functions import lit, udf
 from pyspark.sql.types import ArrayType, Row
 
@@ -107,7 +106,7 @@ class PdfDataToImage(
             logging.warning(exception)
             return [Image(path=path, exception=exception)]
 
-    def _transform(self, dataset: DataFrame) -> DataFrame:
+    def _transform(self, dataset):
         out_col = self.getOutputCol()
         input_col = self._validate(self.getInputCol(), dataset)
         try:

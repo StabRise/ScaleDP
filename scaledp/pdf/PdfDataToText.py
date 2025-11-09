@@ -7,7 +7,7 @@ import fitz
 from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-from pyspark.pandas import DataFrame
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import posexplode_outer, udf
 from pyspark.sql.types import ArrayType, Row
 

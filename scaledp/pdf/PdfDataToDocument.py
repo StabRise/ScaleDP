@@ -7,7 +7,6 @@ import fitz
 from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-from pyspark.pandas import DataFrame
 from pyspark.sql.functions import udf
 from pyspark.sql.types import Row
 
@@ -152,7 +151,7 @@ class PdfDataToDocument(
                 ),
             ]
 
-    def _transform(self, dataset: DataFrame) -> DataFrame:
+    def _transform(self, dataset):
         out_col = self.getOutputCol()
         input_col = self._validate(self.getInputCol(), dataset)
         path_col = dataset[self.getPathCol()]
