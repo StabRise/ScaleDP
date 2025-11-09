@@ -6,10 +6,14 @@
 - Added labels param to the [YoloOnnxDetector](https://scaledp.stabrise.com/en/latest/models/detectors/yolo_onnx_detector.html)
 - Improve displaying labels in [ImageDrawBoxes](https://scaledp.stabrise.com/en/latest/image/image_draw_boxes.html)
 
+### 🧰 Maintenance
+- Updated versions of dependencies (Pandas, Numpy, OpenCV)
+
 ### 🐛 Bug Fixes
 
 - Fixed convert color schema in [YoloOnnxDetector](https://scaledp.stabrise.com/en/latest/models/detectors/yolo_onnx_detector.html)
-
+- Fixed show utils on Google Colab
+- Fixed imports of the DataFrame
 
 ## [0.2.4]- 02.11.2025
 
