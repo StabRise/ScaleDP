@@ -1,4 +1,4 @@
-## [unreleased]
+## [0.2.5] - 10.11.2025
 
 ### 🚀 Features
 
@@ -15,7 +15,7 @@
 - Fixed show utils on Google Colab
 - Fixed imports of the DataFrame
 
-## [0.2.4]- 02.11.2025
+## [0.2.4] - 02.11.2025
 
 ### 🚀 Features
 

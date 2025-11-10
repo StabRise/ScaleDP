@@ -165,3 +165,4 @@ cython_debug/
 /.run/*
 /tests/testresources/private/
 /tests/models/detectors/test_signature_detector_private.py
+/blog_posts/
