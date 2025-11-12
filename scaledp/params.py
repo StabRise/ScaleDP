@@ -306,6 +306,15 @@ class HasDevice(Params):
         """
         return self.getOrDefault(self.device)
 
+    def getSTDevice(self):
+        """
+        Gets the value of device for SentenceTransformer.
+        """
+        device = self.getOrDefault(self.device)
+        if device == -1:
+            return "cpu"
+        return f"cuda:{device}"
+
 
 class HasBatchSize(Params):
     batchSize = Param(

@@ -5,6 +5,7 @@ import datetime
 from dataclasses import fields, is_dataclass
 from typing import Dict, Type, Union, get_type_hints
 
+from pyspark.ml.linalg import Vector, VectorUDT
 from pyspark.sql.types import (
     ArrayType,
     BinaryType,
@@ -37,6 +38,7 @@ type_mapping = {
     datetime.date: DateType,
     bool: BooleanType,
     BinaryT: BinaryType,
+    Vector: VectorUDT,
 }
 
 
@@ -140,6 +142,11 @@ def get_spark_type(
     if is_optional_type(py_type):
         elem_type = py_type.__args__[0]
         return get_spark_type(elem_type)
+
+    # Handle list types recursively
+    if hasattr(py_type, "__origin__") and py_type.__origin__ is list:
+        elem_type = py_type.__args__[0]
+        return ArrayType(get_spark_type(elem_type))
 
     raise Exception(f"Type {py_type} is not supported by PySpark")
 
