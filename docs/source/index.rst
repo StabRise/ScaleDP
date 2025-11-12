@@ -46,6 +46,7 @@ Benefits of using ScaleDP
    pdf_processing.md
    detectors.md
    ocr.md
+   embeddings.md
    show_utils.md
    release_notes.md
 
