@@ -1,3 +1,10 @@
+## [unreleased]
+
+### 🚀 Features
+
+- Added TextEmbeddings transformer, for compute embedding using SentenceTransformers
+
+
 ## [0.2.5] - 10.11.2025
 
 ### 🚀 Features
