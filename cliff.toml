@@ -61,6 +61,7 @@ protect_breaking_commits = false
 commit_parsers = [
     { message = "^feat", group = "<!-- 0 -->🚀 Features" },
     { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
+    { message = "^update", group = "<!-- 2 -->🔄 Updates" },
     { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
     { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
     { message = "^maint", group = "<!-- 4 -->🧰 Maintenance" },
