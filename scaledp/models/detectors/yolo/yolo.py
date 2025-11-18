@@ -5,12 +5,13 @@ import cv2
 import numpy as np
 import onnxruntime
 
+from scaledp.enums import Device
 from scaledp.models.detectors.yolo.utils import multiclass_nms, xywh2xyxy
 
 
 class YOLO:
 
-    def __init__(self, path, conf_thres=0.7, iou_thres=0.5) -> None:
+    def __init__(self, path, device=Device.CPU, conf_thres=0.7, iou_thres=0.5) -> None:
         self.conf_threshold = conf_thres
         self.iou_threshold = iou_thres
 
@@ -22,15 +23,24 @@ class YOLO:
         self.pad_y = None
 
         # Initialize model
-        self.initialize_model(path)
+        self.initialize_model(path, device)
 
     def __call__(self, image) -> Any:
         return self.detect_objects(image)
 
-    def initialize_model(self, path):
-        self.session = onnxruntime.InferenceSession(
-            path, providers=onnxruntime.get_available_providers()
+    def initialize_model(self, path, device):
+        provider = (
+            "CUDAExecutionProvider" if device == Device.CUDA else "CPUExecutionProvider"
         )
+
+        if provider in onnxruntime.get_available_providers():
+            providers = [provider]
+        else:
+            logging.warning(
+                f"{provider} is not available. Falling back to CPUExecutionProvider."
+            )
+            providers = ["CPUExecutionProvider"]
+        self.session = onnxruntime.InferenceSession(path, providers=providers)
         # Get model info
         self.get_input_details()
         self.get_output_details()
