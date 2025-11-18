@@ -864,3 +864,53 @@ class HasLabels(Params):
         Sets the value of :py:attr:`labels`.
         """
         return self._set(labels=value)
+
+
+class HasChunkSize(Params):
+    """
+    Mixin for param chunk_size: size of text chunks.
+    """
+
+    chunk_size = Param(
+        Params._dummy(),
+        "chunk_size",
+        "Size of text chunks for splitting.",
+        typeConverter=TypeConverters.toInt,
+    )
+
+    def getChunkSize(self) -> int:
+        """
+        Gets the value of chunk_size or its default value.
+        """
+        return self.getOrDefault(self.chunk_size)
+
+    def setChunkSize(self, value: int) -> Any:
+        """
+        Sets the value of :py:attr:`chunk_size`.
+        """
+        return self._set(chunk_size=value)
+
+
+class HasChunkOverlap(Params):
+    """
+    Mixin for param chunk_overlap: overlap between text chunks.
+    """
+
+    chunk_overlap = Param(
+        Params._dummy(),
+        "chunk_overlap",
+        "Overlap between text chunks for splitting.",
+        typeConverter=TypeConverters.toInt,
+    )
+
+    def getChunkOverlap(self) -> int:
+        """
+        Gets the value of chunk_overlap or its default value.
+        """
+        return self.getOrDefault(self.chunk_overlap)
+
+    def setChunkOverlap(self, value: int) -> Any:
+        """
+        Sets the value of :py:attr:`chunk_overlap`.
+        """
+        return self._set(chunk_overlap=value)

@@ -47,6 +47,8 @@ Benefits of using ScaleDP
    detectors.md
    ocr.md
    embeddings.md
+   splitters.md
+   schemas.md
    show_utils.md
    release_notes.md
 
