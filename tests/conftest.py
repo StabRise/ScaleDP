@@ -234,3 +234,25 @@ def text_df(spark_session, resource_path_root):
         (resource_path_root / "texts/example.txt").absolute().as_posix(),
         wholetext=True,
     )
+
+
+@pytest.fixture
+def text_splitter_df(spark_session, resource_path_root):
+    """Fixture for text splitter tests with Document struct column."""
+    from pyspark.sql.functions import col, lit, struct
+    from pyspark.sql.types import ArrayType, StructType
+
+    text_path = (resource_path_root / "texts/example.txt").absolute().as_posix()
+    df = spark_session.read.text(text_path, wholetext=True)
+
+    # Create Document struct from text and path
+    return df.withColumn(
+        "document",
+        struct(
+            lit(text_path).alias("path"),
+            col("value").alias("text"),
+            lit("text").alias("type"),
+            lit([]).cast(ArrayType(StructType([]))).alias("bboxes"),
+            lit("").alias("exception"),
+        ),
+    ).select("document")

@@ -5295,6 +5295,30 @@ doc = ["intersphinx_registry", "jupyterlite-pyodide-kernel", "jupyterlite-sphinx
 test = ["Cython", "array-api-strict (>=2.0,<2.1.1)", "asv", "gmpy2", "hypothesis (>=6.30)", "meson", "mpmath", "ninja ; sys_platform != \"emscripten\"", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
 
 [[package]]
+name = "semantic-text-splitter"
+version = "0.28.0"
+description = ""
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:625ed49fae4be45ef624da1b57326356c33d26dc275b4115c20afe8d1e7abab1"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:d185880c21ae2028261efe0271d7d6e2a90bf933179e850857b99648dc637496"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:f92c11610c7b2999033f8b5bc139133008d9a2b6a71daea312c7d22ce3199fe0"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-manylinux_2_28_armv7l.whl", hash = "sha256:f44b77e5f06059b5d30035ce29880da40d61a0519b6b3292a88ac59135c54079"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-manylinux_2_28_ppc64le.whl", hash = "sha256:de4742f5d04f92fbca553aefae5febb772793c939044ea40028b00ca8e4c47b9"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-manylinux_2_28_s390x.whl", hash = "sha256:76db639fda2c8d56347e38b9ee2d355887406f6bc410d02f646dad27557760ef"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:dbe46461c9ea58fcad04fffdab20af9653929134ef700113522865fbbd0b8af9"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-win32.whl", hash = "sha256:f26b5cfda7fcff81a829ce9bb10858838872602a7bffe2e7ca1e97d5d18143b0"},
+    {file = "semantic_text_splitter-0.28.0-cp310-abi3-win_amd64.whl", hash = "sha256:a793d98114c088ca11eeefbfe392946adfe4d1eb421b12ce213cb818348d3614"},
+    {file = "semantic_text_splitter-0.28.0.tar.gz", hash = "sha256:2cdd968fe1411abedc23aa283858def9178288b1e8ab2357bb91cccf2e8cf920"},
+]
+
+[package.extras]
+docs = ["pdoc"]
+test = ["pytest", "tokenizers", "tree-sitter-python"]
+
+[[package]]
 name = "send2trash"
 version = "1.8.3"
 description = "Send file to trash natively under Mac OS X, Windows and Linux"
@@ -6459,4 +6483,4 @@ paddle = []
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "e3513c9d3fa60d18fc08b4c95ad59c7f682c02f30bfa1bf72df23b2214cb7536"
+content-hash = "ee4297467bca0a395d309d277d45b3a86294a26a7846654903ba3f68219464f0"
