@@ -11,6 +11,21 @@ This document outlines the release notes for the ScaledP project. It includes in
 - Added [TextEmbeddings](#TextEmbeddings) transformer, for compute embedding using SentenceTransformers
 
 
+## [0.2.6] - 19.11.2025
+
+### 🚀 Features
+
+- Enable support GPU in [YoloOnnxDetector](#YoloOnnxDetector)
+
+### 🔄 Updates
+
+- Change default values for detectors
+
+### 📘 Jupyter Notebooks
+
+- [YoloOnnxDetectorBenchamrks.ipynb](https://github.com/StabRise/ScaleDP-Tutorials/blob/master/object-detection/4.YoloOnnxDetectorBenchmarks.ipynb) - Benchmarking YOLO model with different parameters configurations on CPU and GPU
+
+
 ## [0.2.5] - 10.11.2025
 
 ### 🚀 Features
