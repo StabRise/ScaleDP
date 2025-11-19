@@ -48,8 +48,8 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize, HasLabels):
             "batchSize": 2,
             "partitionMap": False,
             "numPartitions": 0,
-            "pageCol": "page",
-            "pathCol": "path",
+            "pageCol": "",
+            "pathCol": "",
             "propagateError": False,
             "task": "detect",
             "onlyRotated": False,
@@ -83,7 +83,11 @@ class YoloOnnxDetector(BaseDetector, HasDevice, HasBatchSize, HasLabels):
 
         logging.info("Model downloaded")
 
-        detector = YOLO(model_path_final, conf_thres=params["scoreThreshold"])
+        detector = YOLO(
+            model_path_final,
+            conf_thres=params["scoreThreshold"],
+            device=params["device"],
+        )
 
         cls._model[model_path] = detector
         return cls._model[model_path]

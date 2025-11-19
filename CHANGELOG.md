@@ -5,6 +5,21 @@
 - Added TextEmbeddings transformer, for compute embedding using SentenceTransformers
 
 
+## [0.2.6] - 19.11.2025
+
+### 🚀 Features
+
+- Enable support GPU in [YoloOnnxDetector](https://scaledp.stabrise.com/en/latest/models/detectors/yolo_onnx_detector.html)
+
+### 🔄 Updates
+
+- Change default values for detectors
+
+### 📘 Jupyter Notebooks
+
+- [YoloOnnxDetectorBenchamrks.ipynb](https://github.com/StabRise/ScaleDP-Tutorials/blob/master/object-detection/4.YoloOnnxDetectorBenchmarks.ipynb) - Benchmarking YOLO model with different parameters configurations on CPU and GPU
+
+
 ## [0.2.5] - 10.11.2025
 
 ### 🚀 Features
@@ -14,6 +29,7 @@
 - Improve displaying labels in [ImageDrawBoxes](https://scaledp.stabrise.com/en/latest/image/image_draw_boxes.html)
 
 ### 🧰 Maintenance
+
 - Updated versions of dependencies (Pandas, Numpy, OpenCV)
 
 ### 🐛 Bug Fixes
