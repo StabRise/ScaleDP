@@ -1,4 +1,3 @@
-import pytest
 from pyspark.ml import PipelineModel
 
 from scaledp.models.splitters.TextSplitter import TextSplitter
@@ -70,7 +69,7 @@ def test_text_splitter_split_method_with_exception():
     assert result.processing_time > 0
 
 
-def test_text_splitter_pipeline(text_splitter_df):
+def test_text_splitter_pipeline(document_df):
     """Test TextSplitter in a PySpark pipeline."""
     # Initialize the TextSplitter stage
     text_splitter = TextSplitter(
@@ -82,7 +81,7 @@ def test_text_splitter_pipeline(text_splitter_df):
     # Create a pipeline with the TextSplitter stage
     pipeline = PipelineModel(stages=[text_splitter])
 
-    result_df = pipeline.transform(text_splitter_df)
+    result_df = pipeline.transform(document_df)
 
     # Cache the result for performance
     result = result_df.select("chunks").cache()
@@ -107,10 +106,7 @@ def test_text_splitter_pipeline(text_splitter_df):
         assert row.chunks.processing_time > 0
 
 
-@pytest.mark.skip(
-    reason="pandas_udf schema handling needs refinement for Document structs",
-)
-def test_text_splitter_pipeline_pandas(text_splitter_df):
+def test_text_splitter_pipeline_pandas(document_df):
     """Test TextSplitter with partitionMap (pandas mode)."""
     # Initialize the TextSplitter stage
     text_splitter = TextSplitter(
@@ -123,7 +119,7 @@ def test_text_splitter_pipeline_pandas(text_splitter_df):
     # Create a pipeline with the TextSplitter stage
     pipeline = PipelineModel(stages=[text_splitter])
 
-    result_df = pipeline.transform(text_splitter_df)
+    result_df = pipeline.transform(document_df)
 
     # Cache the result for performance
     result = result_df.select("chunks").cache()
