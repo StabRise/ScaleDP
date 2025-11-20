@@ -8,6 +8,7 @@ from scaledp.enums import ImageType
 from scaledp.image.DataToImage import DataToImage
 from scaledp.pipeline.PandasPipeline import pathSparkFunctions, unpathSparkFunctions
 from scaledp.schemas.Image import Image
+from scaledp.schemas.TextChunks import TextChunks
 
 
 @pytest.fixture
@@ -237,7 +238,7 @@ def text_df(spark_session, resource_path_root):
 
 
 @pytest.fixture
-def text_splitter_df(spark_session, resource_path_root):
+def document_df(spark_session, resource_path_root):
     """Fixture for text splitter tests with Document struct column."""
     from pyspark.sql.functions import col, lit, struct
     from pyspark.sql.types import ArrayType, StructType
@@ -256,3 +257,24 @@ def text_splitter_df(spark_session, resource_path_root):
             lit("").alias("exception"),
         ),
     ).select("document")
+
+
+@pytest.fixture
+def df_text_chunks(spark_session):
+    """Fixture for TextChunks schema with sample data."""
+    from pyspark.sql.functions import struct
+
+    chunks_data = [
+        ("file1.txt", ["hello world", "this is a test"], "", 1.0),
+        ("file2.txt", ["another chunk", "more text"], "", 2.0),
+        ("file3.txt", ["final chunk"], "", 0.5),
+    ]
+
+    return spark_session.createDataFrame(
+        chunks_data,
+        schema=TextChunks.get_schema(),
+    ).select(
+        struct("path", "chunks", "exception", "processing_time").alias(
+            "text_chunks_col",
+        ),
+    )
