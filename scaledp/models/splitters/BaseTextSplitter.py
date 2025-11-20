@@ -78,7 +78,7 @@ class BaseTextSplitter(
     @classmethod
     def transform_udf_pandas(
         cls,
-        documents: pd.Series,
+        documents: pd.DataFrame,
         params: pd.Series,
     ) -> pd.DataFrame:
         """
@@ -94,22 +94,16 @@ class BaseTextSplitter(
         params_dict = json.loads(params.iloc[0])
         splitter = cls(**params_dict)
         results = []
-        for doc_row in documents:
+        for _, doc_row in documents.iterrows():
             # Convert Row to Document
             # When using pandas_udf with Arrow, the struct comes as
             # a Row object with field attributes
             try:
-                if isinstance(doc_row, Document):
-                    doc = doc_row
-                else:
-                    # Try to get attributes from Row object
-                    doc = Document(
-                        path=doc_row.path,
-                        text=doc_row.text,
-                        type=doc_row.type,
-                        bboxes=doc_row.bboxes,
-                        exception=getattr(doc_row, "exception", ""),
-                    )
+                doc = (
+                    doc_row
+                    if isinstance(doc_row, Document)
+                    else Document(**doc_row.to_dict())
+                )
                 output = splitter.split(doc)
             except (AttributeError, TypeError, Exception) as e:
                 # If something goes wrong, create an error result
@@ -119,16 +113,8 @@ class BaseTextSplitter(
                     exception=str(e),
                     processing_time=0.0,
                 )
-
             # Convert to dict to ensure proper schema
-            results.append(
-                {
-                    "path": output.path,
-                    "chunks": output.chunks,
-                    "exception": output.exception,
-                    "processing_time": output.processing_time,
-                },
-            )
+            results.append(output)
         return pd.DataFrame(results)
 
     def _transform(self, dataset):

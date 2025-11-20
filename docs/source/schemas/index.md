@@ -28,6 +28,18 @@ Represents the output of text splitting operations.
 
 **Usage:** Output from text splitters, input for embeddings.
 
+### [EmbeddingsOutput](./embeddings_output.md)
+Represents the output of text embedding operations.
+
+**Key Fields:**
+- `path` - Source document or chunk path
+- `data` - Embedding vector (list of floats)
+- `type` - Input type ("text" or "text_chunk")
+- `exception` - Error message if any
+- `processing_time` - Processing duration
+
+**Usage:** Output from embedding transformers, input for similarity search and vector databases.
+
 ### [Box](./box.md)
 Represents a bounding box with position and text information.
 
@@ -62,6 +74,13 @@ TextChunks
 ├── chunks: list[str]
 ├── exception: str
 └── processing_time: float
+
+EmbeddingsOutput
+├── path: str
+├── data: list[float]
+├── type: str
+├── exception: str
+└── processing_time: float
 ```
 
 ## Processing Pipeline Overview
@@ -73,18 +92,21 @@ Text Splitter
     ↓
 TextChunks (Split Results)
     ↓
-Embeddings / NER / Other Processing
+TextEmbeddings
     ↓
-Results
+EmbeddingsOutput (Embeddings)
+    ↓
+Vector DB / Similarity Search / Other Processing
 ```
 
 ## Quick Reference
 
-| Schema      | Purpose                      | Input To           | Output From    |
-|-------------|------------------------------|-------------------|-----------------|
-| Document   | Represents document data     | Text Splitter, NER | PDF Reader     |
-| TextChunks | Represents text chunks       | Embeddings, Search | Text Splitter  |
-| Box        | Represents spatial region    | Layout Analysis    | OCR, Detector  |
+| Schema           | Purpose                      | Input To           | Output From       |
+|------------------|------------------------------|-------------------|-------------------|
+| Document         | Represents document data     | Text Splitter, NER | PDF Reader        |
+| TextChunks       | Represents text chunks       | Embeddings, Search | Text Splitter     |
+| EmbeddingsOutput | Represents embeddings        | Vector DB, Search  | TextEmbeddings    |
+| Box              | Represents spatial region    | Layout Analysis    | OCR, Detector     |
 
 ## Common Operations
 
