@@ -45,13 +45,13 @@ html_theme_options = {
         },
         {
             "name": "PyPI",
-            "url": "https://pypi.org/project/scalepd/",
+            "url": "https://pypi.org/project/scaledp/",
             "icon": "https://img.shields.io/pypi/v/scaledp.svg",
             "type": "url",
         },
         {
             "name": "by StabRise",
-            "url": "https://stabrise.com",
+            "url": "https://stabrise.com/scaleds/",
             "icon": "https://img.shields.io/badge/by-StabRise-orange.svg?style=flat&colorA=E1523D&colorB=blue",
             "type": "url",
         },
