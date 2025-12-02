@@ -247,16 +247,20 @@ def document_df(spark_session, resource_path_root):
     df = spark_session.read.text(text_path, wholetext=True)
 
     # Create Document struct from text and path
-    return df.withColumn(
-        "document",
-        struct(
-            lit(text_path).alias("path"),
-            col("value").alias("text"),
-            lit("text").alias("type"),
-            lit([]).cast(ArrayType(StructType([]))).alias("bboxes"),
-            lit("").alias("exception"),
-        ),
-    ).select("document")
+    return (
+        df.withColumn(
+            "document",
+            struct(
+                lit(text_path).alias("path"),
+                col("value").alias("text"),
+                lit("text").alias("type"),
+                lit([]).cast(ArrayType(StructType([]))).alias("bboxes"),
+                lit("").alias("exception"),
+            ),
+        )
+        .withColumn("page_number", lit(0))
+        .select("document", "page_number")
+    )
 
 
 @pytest.fixture
@@ -265,16 +269,16 @@ def df_text_chunks(spark_session):
     from pyspark.sql.functions import struct
 
     chunks_data = [
-        ("file1.txt", ["hello world", "this is a test"], "", 1.0),
-        ("file2.txt", ["another chunk", "more text"], "", 2.0),
-        ("file3.txt", ["final chunk"], "", 0.5),
+        ("file1.txt", 0, ["hello world", "this is a test"], "", 1.0),
+        ("file2.txt", 0, ["another chunk", "more text"], "", 2.0),
+        ("file3.txt", 0, ["final chunk"], "", 0.5),
     ]
 
     return spark_session.createDataFrame(
         chunks_data,
         schema=TextChunks.get_schema(),
     ).select(
-        struct("path", "chunks", "exception", "processing_time").alias(
+        struct("path", "page", "chunks", "exception", "processing_time").alias(
             "text_chunks_col",
         ),
     )

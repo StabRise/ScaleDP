@@ -36,6 +36,7 @@ class BaseTextSplitter(
             "chunk_overlap": 0,
             "numPartitions": 1,
             "partitionMap": False,
+            "pageCol": "page_number",
         },
     )
 
@@ -50,18 +51,19 @@ class BaseTextSplitter(
         return json.dumps({k.name: v for k, v in self.extractParamMap().items()})
 
     @abstractmethod
-    def split(self, document: Document) -> TextChunks:
+    def split(self, document: Document, pagen_number: int) -> TextChunks:
         """
         Split a document into chunks.
 
         Args:
             document: The document to split
+            pagen_number: The page number of the document
 
         Returns:
             TextChunks object containing the chunks and metadata
         """
 
-    def transform_udf(self, document_struct):
+    def transform_udf(self, document_struct, page_number):
         """
         Transform UDF that splits text into chunks.
 
@@ -72,13 +74,14 @@ class BaseTextSplitter(
             TextChunks object containing the chunks
         """
         # document_struct is already a Document object
-        result = self.split(document_struct)
+        result = self.split(document_struct, page_number)
         return result
 
     @classmethod
     def transform_udf_pandas(
         cls,
         documents: pd.DataFrame,
+        page_numbers: pd.Series,
         params: pd.Series,
     ) -> pd.DataFrame:
         """
@@ -94,7 +97,7 @@ class BaseTextSplitter(
         params_dict = json.loads(params.iloc[0])
         splitter = cls(**params_dict)
         results = []
-        for _, doc_row in documents.iterrows():
+        for i, doc_row in documents.iterrows():
             # Convert Row to Document
             # When using pandas_udf with Arrow, the struct comes as
             # a Row object with field attributes
@@ -104,7 +107,7 @@ class BaseTextSplitter(
                     if isinstance(doc_row, Document)
                     else Document(**doc_row.to_dict())
                 )
-                output = splitter.split(doc)
+                output = splitter.split(doc, page_numbers.iloc[i])
             except (AttributeError, TypeError, Exception) as e:
                 # If something goes wrong, create an error result
                 output = TextChunks(
@@ -130,6 +133,7 @@ class BaseTextSplitter(
         params = self.get_params()
         out_col = self.getOutputCol()
         input_col = self.getInputCol()
+        page_col = self.getPageCol()
 
         # Validate input column exists
         if input_col not in dataset.columns:
@@ -137,12 +141,16 @@ class BaseTextSplitter(
 
         # Validate input column
         validated_input_col = self._validate(input_col, dataset)
+        validated_page_col = self._validate(page_col, dataset)
 
         if not self.getPartitionMap():
             # Regular mode: use UDF
             result = dataset.withColumn(
                 out_col,
-                udf(self.transform_udf, TextChunks.get_schema())(validated_input_col),
+                udf(self.transform_udf, TextChunks.get_schema())(
+                    validated_input_col,
+                    validated_page_col,
+                ),
             )
         else:
             # Pandas mode: use pandas_udf
@@ -153,6 +161,7 @@ class BaseTextSplitter(
                 out_col,
                 pandas_udf(self.transform_udf_pandas, TextChunks.get_schema())(
                     validated_input_col,
+                    validated_page_col,
                     lit(params),
                 ),
             )

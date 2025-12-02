@@ -1,8 +1,21 @@
-## [unreleased]
+## [0.3.0] - 02.11.2025
 
 ### 🚀 Features
 
-- Added TextEmbeddings transformer, for compute embedding using SentenceTransformers
+- Added [TextEmbeddings](https://scaledp.stabrise.com/en/latest/models/embeddings/TextEmbeddings.html) transformer, for compute embedding using SentenceTransformers
+- Added BaseTextSplitter and [TextSplitter](https://scaledp.stabrise.com/en/latest/models/splitters/text_splitter.html) for semantic splitting text
+- Added support pandas udf for TextSplitter
+- Added support TextChunks as input to TextEmbeddings
+
+### 📚 Documentation
+
+- Added TextEmbedding and TextSplitter docs
+
+### 📘 Jupyter Notebooks
+
+- [TextSplitterAndEmbeddings.ipynb](https://github.com/StabRise/ScaleDP-Tutorials/blob/master/embeddings/1.TextSplitterAndEmbeddings.ipynb
+) - Read pdf documents, split text into chunks and compute embeddings
+
 
 
 ## [0.2.6] - 19.11.2025
