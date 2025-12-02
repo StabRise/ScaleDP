@@ -52,7 +52,7 @@ html_theme_options = {
         {
             "name": "by StabRise",
             "url": "https://stabrise.com",
-            "icon": "https://img.shields.io/badge/by-StabRise-orange.svg?style=flat&colorA=E1523D&colorB=007D8A",
+            "icon": "https://img.shields.io/badge/by-StabRise-orange.svg?style=flat&colorA=E1523D&colorB=blue",
             "type": "url",
         },
     ],

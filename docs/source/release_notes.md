@@ -4,7 +4,7 @@ Release Notes
 This document outlines the release notes for the ScaledP project. It includes information about new features, bug fixes, and other changes made in each version.
 
 
-## [0.3.0] - 02.11.2025
+## [0.3.0] - 02.12.2025
 
 ### 🚀 Features
 
