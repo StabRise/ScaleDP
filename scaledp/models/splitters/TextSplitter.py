@@ -31,7 +31,7 @@ class TextSplitter(BaseTextSplitter):
         chunk_size = self.getOrDefault("chunk_size")
         return SemanticTextSplitter(chunk_size)
 
-    def split(self, document: Document) -> TextChunks:
+    def split(self, document: Document, page_number: int) -> TextChunks:
         start_time = time.time()
         try:
             splitter = self._get_splitter()
@@ -44,6 +44,7 @@ class TextSplitter(BaseTextSplitter):
         return TextChunks(
             path=document.path,
             chunks=chunks,
+            page=page_number,
             exception=exception,
             processing_time=processing_time,
         )

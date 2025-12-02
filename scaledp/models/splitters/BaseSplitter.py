@@ -9,6 +9,7 @@ from scaledp.params import (
     HasKeepInputData,
     HasNumPartitions,
     HasOutputCol,
+    HasPageCol,
     HasPartitionMap,
     HasWhiteList,
 )
@@ -24,6 +25,7 @@ class BaseSplitter(
     HasPartitionMap,
     HasChunkSize,
     HasChunkOverlap,
+    HasPageCol,
     ABC,
 ):
     """

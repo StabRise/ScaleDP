@@ -8,6 +8,8 @@ from scaledp.utils.dataclass import map_dataclass_to_struct, register_type
 @dataclass(order=True)
 class EmbeddingsOutput:
     path: Optional[str]
+    page: Optional[int]
+    text: Optional[str]
     data: Optional[list[float]]
     type: Optional[str]
     exception: Optional[str] = ""

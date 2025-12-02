@@ -37,13 +37,14 @@ def test_text_splitter_split_method():
     document = Document(path="test.txt", text=long_text, type="text", bboxes=[])
 
     # Split the document
-    result = text_splitter.split(document)
+    result = text_splitter.split(document, 0)
 
     # Verify the result
     assert result.path == "test.txt"
     assert result.exception == ""
     assert len(result.chunks) > 1
     assert result.processing_time > 0
+    assert result.page == 0
 
     # Verify all chunks are strings
     assert all(isinstance(chunk, str) for chunk in result.chunks)
@@ -60,7 +61,7 @@ def test_text_splitter_split_method_with_exception():
     document = Document(path="test.txt", text=None, type="text", bboxes=[])
 
     # Split the document
-    result = text_splitter.split(document)
+    result = text_splitter.split(document, 0)
 
     # Verify the result contains exception information
     assert result.path == "test.txt"

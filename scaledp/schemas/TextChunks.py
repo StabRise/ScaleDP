@@ -7,6 +7,7 @@ from scaledp.utils.dataclass import map_dataclass_to_struct, register_type
 @dataclass(order=True)
 class TextChunks:
     path: Optional[str]
+    page: Optional[int]
     chunks: Optional[list[str]]
     exception: Optional[str] = ""
     processing_time: Optional[float] = 0.0

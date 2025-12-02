@@ -1,4 +1,5 @@
 import json
+import time
 from dataclasses import asdict
 from types import MappingProxyType
 from typing import Any
@@ -57,7 +58,7 @@ class TextEmbeddings(BaseEmbeddings):
             # Handle TextChunks input - use explode to create multiple rows
             if not self.getPartitionMap():
                 # Use UDF with explode
-                result = dataset.withColumn(
+                result = dataset.select(in_col).withColumn(
                     out_col,
                     explode(
                         udf(
@@ -75,7 +76,7 @@ class TextEmbeddings(BaseEmbeddings):
                         dataset = dataset.repartition(self.getPathCol())
                     dataset = dataset.coalesce(self.getNumPartitions())
 
-                result = dataset.withColumn(
+                result = dataset.select(in_col).withColumn(
                     out_col,
                     explode(
                         pandas_udf(
@@ -130,38 +131,55 @@ class TextEmbeddings(BaseEmbeddings):
 
     def transform_udf(self, text: str):
         model = self.get_model()
+        start_time = time.time()
         embedding = model.encode(
             text,
             batch_size=self.getBatchSize(),
             device=self.getSTDevice(),
         )
+        processing_time = time.time() - start_time
         return EmbeddingsOutput(
             path="memory",
+            page=0,
+            text=text,
             data=embedding.tolist(),
             type="text",
+            processing_time=processing_time,
             exception="",
         )
 
     def transform_udf_chunks(self, text_chunks: TextChunks):
-        """Transform TextChunks into embeddings, preserving path information."""
+        """Transform TextChunks into embeddings, preserving path information
+        and per-item processing time (batched).
+        """
         if not text_chunks or not text_chunks.chunks:
             return []
 
+        start_time = time.time()
         model = self.get_model()
         embeddings = model.encode(
             text_chunks.chunks,
             batch_size=self.getBatchSize(),
             device=self.getSTDevice(),
         )
+        total_processing_time = time.time() - start_time
+        per_item_time = (
+            total_processing_time / len(text_chunks.chunks)
+            if text_chunks.chunks
+            else 0.0
+        )
+
         results = []
-        for embedding in embeddings:
+        for i, embedding in enumerate(embeddings):
             results.append(
                 EmbeddingsOutput(
                     path=text_chunks.path or "memory",
                     data=embedding.tolist(),
+                    page=text_chunks.page,
+                    text=text_chunks.chunks[i],
                     type="text_chunk",
                     exception=text_chunks.exception or "",
-                    processing_time=text_chunks.processing_time or 0.0,
+                    processing_time=per_item_time,
                 ),
             )
         return results
@@ -170,18 +188,26 @@ class TextEmbeddings(BaseEmbeddings):
     def transform_udf_pandas(texts: pd.Series, params: pd.Series) -> pd.DataFrame:
         params = json.loads(params[0])
         model = SentenceTransformer(params["model"])
+        start_time = time.time()
         embeddings = model.encode(
             texts.tolist(),
             batch_size=params["batchSize"],
             device="cpu" if params["device"] == Device.CPU.value else "cuda",
         )
+        total_processing_time = time.time() - start_time
+        per_item_time = (
+            total_processing_time / texts.shape[0] if texts is not None else 0.0
+        )
         results = []
-        for embedding in embeddings:
+        for i, embedding in enumerate(embeddings):
             results.append(
                 EmbeddingsOutput(
                     path="memory",
+                    page=0,
+                    text=texts.iloc[i],
                     data=embedding.tolist(),
                     type="text",
+                    processing_time=per_item_time,
                     exception="",
                 ),
             )
@@ -199,21 +225,26 @@ class TextEmbeddings(BaseEmbeddings):
         results = []
         for _, row in chunks_df.iterrows():
             if len(row["chunks"]):
+                start_time = time.time()
                 embeddings = model.encode(
                     row["chunks"],
                     batch_size=params["batchSize"],
                     device="cpu" if params["device"] == Device.CPU.value else "cuda",
                 )
+                total_processing_time = time.time() - start_time
+                per_item_time = total_processing_time / len(row["chunks"])
                 emb_results = []
-                for embedding in embeddings:
+                for i, embedding in enumerate(embeddings):
                     emb_results.append(
                         asdict(
                             EmbeddingsOutput(
                                 path=row.get("path") or "memory",
                                 data=embedding.tolist(),
+                                text=row["chunks"][i],
+                                page=row.get("page"),
                                 type="text_chunk",
                                 exception=row.get("exception") or "",
-                                processing_time=row.get("processing_time") or 0.0,
+                                processing_time=per_item_time or 0.0,
                             ),
                         ),
                     )

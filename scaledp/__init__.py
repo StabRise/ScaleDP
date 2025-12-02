@@ -18,6 +18,7 @@ from scaledp.models.detectors.LayoutDetector import LayoutDetector
 from scaledp.models.detectors.SignatureDetector import SignatureDetector
 from scaledp.models.detectors.YoloDetector import YoloDetector
 from scaledp.models.detectors.YoloOnnxDetector import YoloOnnxDetector
+from scaledp.models.embeddings.TextEmbeddings import TextEmbeddings
 from scaledp.models.extractors.DSPyExtractor import DSPyExtractor
 from scaledp.models.extractors.LLMExtractor import LLMExtractor
 from scaledp.models.extractors.LLMVisualExtractor import LLMVisualExtractor
@@ -29,6 +30,7 @@ from scaledp.models.recognizers.LLMOcr import LLMOcr
 from scaledp.models.recognizers.SuryaOcr import SuryaOcr
 from scaledp.models.recognizers.TesseractOcr import TesseractOcr
 from scaledp.models.recognizers.TesseractRecognizer import TesseractRecognizer
+from scaledp.models.splitters.TextSplitter import TextSplitter
 from scaledp.pdf.PdfAddTextLayer import PdfAddTextLayer
 from scaledp.pdf.PdfAssembler import PdfAssembler
 from scaledp.pdf.PdfDataToDocument import PdfDataToDocument
@@ -214,6 +216,8 @@ __all__ = [
     "TesseractOcr",
     "Ner",
     "TextToDocument",
+    "TextSplitter",
+    "TextEmbeddings",
     "LayoutDetector",
     "PipelineModel",
     "SuryaOcr",
