@@ -7,7 +7,6 @@ from typing import Any
 import pandas as pd
 from pyspark import keyword_only
 from pyspark.sql.types import ArrayType, StructType
-from sentence_transformers import SentenceTransformer
 
 from scaledp.enums import Device
 from scaledp.models.embeddings.BaseEmbeddings import BaseEmbeddings
@@ -113,6 +112,7 @@ class TextEmbeddings(BaseEmbeddings):
         return result
 
     def get_model(self):
+        from sentence_transformers import SentenceTransformer
         if self._model is None:
             self._model = SentenceTransformer(self.getModel())
         return self._model
@@ -186,6 +186,7 @@ class TextEmbeddings(BaseEmbeddings):
 
     @staticmethod
     def transform_udf_pandas(texts: pd.Series, params: pd.Series) -> pd.DataFrame:
+        from sentence_transformers import SentenceTransformer
         params = json.loads(params[0])
         model = SentenceTransformer(params["model"])
         start_time = time.time()
@@ -219,6 +220,7 @@ class TextEmbeddings(BaseEmbeddings):
         params: pd.Series,
     ) -> pd.Series:
         """Transform TextChunks into embeddings using pandas_udf, preserving path information."""
+        from sentence_transformers import SentenceTransformer
         params = json.loads(params.iloc[0])
         model = SentenceTransformer(params["model"])
 
