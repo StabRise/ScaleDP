@@ -80,3 +80,37 @@ def test_pdf_data_to_text_invalid_pdf(tmp_path: Path) -> None:
     assert result[0].exception != "", "Expected error message for invalid PDF"
     assert result[0].text == "", "Expected empty text for invalid PDF"
     assert len(result[0].bboxes) == 0, "Expected no bounding boxes for invalid PDF"
+
+
+def test_pdf_data_to_text_rotated_text(
+    extraction_conditions_pdf_file: str,
+    extraction_conditions_rotated_probes: list[dict],
+) -> None:
+    """Rotated (90/180/270), skewed and vertically stacked text from the PDF
+    text layer must be extracted with boxes at the right position.
+    """
+    with Path.open(extraction_conditions_pdf_file, "rb") as f:
+        data = f.read()
+
+    result = list(PdfDataToText().transform_udf(data, "path"))
+    assert len(result) == 1, "Expected 1 page from the PDF file"
+    page = result[0]
+    assert page.exception == "", "Expected no exception"
+
+    for probe in extraction_conditions_rotated_probes:
+        if probe["channel"] != "text_layer":
+            continue
+        x0, y0, x1, y1 = probe["bbox"]
+        words = [
+            box.text
+            for box in page.bboxes
+            if box.x < x1
+            and box.x + box.width > x0
+            and box.y < y1
+            and box.y + box.height > y0
+        ]
+        # Stacked glyphs are extracted as one word per character
+        separator = "" if probe["orientation"] == "vertical" else " "
+        text = separator.join(words)
+        assert "Freya" in text, f"{probe['id']} ({probe['orientation']}): {words}"
+        assert "Yamamoto" in text, f"{probe['id']} ({probe['orientation']}): {words}"
